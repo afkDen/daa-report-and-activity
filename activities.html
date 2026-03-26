@@ -15,6 +15,7 @@
   --indigo-400:#818cf8;--indigo-500:#6366f1;--indigo-600:#4f46e5;
   --sky-400:#38bdf8;--sky-500:#0ea5e9;--rose-500:#f43f5e;--rose-400:#fb7185;
   --emerald-400:#34d399;--emerald-500:#10b981;--amber-400:#fbbf24;--amber-500:#f59e0b;
+  --violet-400:#a78bfa;
   --bg:#020617;--card:#0f172a;--card2:#111827;--border:#1e293b;--border2:#243047;
   --text:#f8fafc;--muted:#94a3b8;
   --sans:'Inter',system-ui,sans-serif;--mono:'Fira Code',monospace;
@@ -55,10 +56,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font
 
 /* PROBLEM CARDS */
 .problem-grid{display:flex;flex-direction:column;gap:1.75rem}
-
 .prob-card{background:var(--card);border:1px solid var(--border);border-radius:1rem;overflow:hidden;transition:border-color .2s,box-shadow .2s}
 .prob-card:hover{border-color:var(--border2);box-shadow:0 8px 30px rgba(0,0,0,.4)}
-
 .prob-header{background:var(--card);border-bottom:1px solid var(--border);padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
 .prob-title-wrap{display:flex;align-items:center;gap:.75rem}
 .prob-num{display:flex;align-items:center;justify-content:center;width:2rem;height:2rem;background:var(--indigo-600);color:#fff;font-weight:700;border-radius:.5rem;font-size:.875rem;font-family:var(--mono)}
@@ -74,18 +73,33 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font
   min-height:140px;overflow:visible;position:relative}
 .graph-label{position:absolute;top:.5rem;left:.75rem;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-600);font-family:var(--mono)}
 
-/* SVG node text — reliable cross-browser centering */
-.n-base circle,.n-primary circle,.n-danger circle,.n-dashed circle,.n-secondary circle{transition:all .3s}
-.n-base text,.n-primary text,.n-danger text,.n-dashed text,.n-secondary text{
-  text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;pointer-events:none
-}
+/* SVG node styles */
+.n-base circle{fill:var(--slate-800);stroke:var(--slate-600);stroke-width:2}
+.n-base text{text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;pointer-events:none}
+.n-primary circle{fill:rgba(99,102,241,.2);stroke:var(--indigo-500);stroke-width:2.5;filter:drop-shadow(0 0 6px rgba(99,102,241,.4))}
+.n-primary text{text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;pointer-events:none;fill:#818cf8}
+.n-danger circle{fill:rgba(244,63,94,.15);stroke:var(--rose-500);stroke-width:2.5;filter:drop-shadow(0 0 6px rgba(244,63,94,.4))}
+.n-danger text{text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;pointer-events:none;fill:#fb7185}
+.n-secondary circle{fill:rgba(14,165,233,.12);stroke:var(--sky-500);stroke-width:2}
+.n-secondary text{text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;pointer-events:none;fill:#38bdf8}
+.n-dashed circle{fill:var(--slate-900);stroke:var(--slate-600);stroke-width:1.5;stroke-dasharray:4 2}
+.n-dashed text{text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;pointer-events:none;fill:#475569}
+.n-amber circle{fill:rgba(245,158,11,.12);stroke:var(--amber-500);stroke-width:2}
+.n-amber text{text-anchor:middle;dominant-baseline:central;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;pointer-events:none;fill:#fbbf24}
 
 .e-base{stroke:var(--slate-600);stroke-width:1.8;fill:none}
-.e-danger{stroke:var(--rose-500);stroke-width:2;stroke-dasharray:5 3;fill:none}
+.e-danger{stroke:var(--rose-500);stroke-width:2.2;stroke-dasharray:5 3;fill:none}
+.e-sky{stroke:var(--sky-400);stroke-width:1.8;stroke-opacity:.7;fill:none}
 
 /* TASK BOX */
-.task-box{background:rgba(99,102,241,.05);border-left:3px solid var(--indigo-500);border-radius:0 .6rem .6rem 0;border:1px solid rgba(99,102,241,.2);border-left:3px solid var(--indigo-500);padding:1rem 1.25rem;font-size:.9rem;color:var(--muted);line-height:1.7}
+.task-box{background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.2);border-left:3px solid var(--indigo-500);border-radius:0 .6rem .6rem 0;padding:1rem 1.25rem;font-size:.9rem;color:var(--muted);line-height:1.7}
 .task-box strong{color:var(--text)}
+
+/* CALLOUT */
+.callout{background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.2);border-left:3px solid var(--amber-500);border-radius:0 .6rem .6rem 0;padding:.75rem 1rem;font-size:.82rem;color:var(--muted);margin-bottom:1rem;display:flex;gap:.6rem;align-items:flex-start}
+.callout i{color:var(--amber-500);flex-shrink:0;margin-top:.2rem}
+.callout.rose{background:rgba(244,63,94,.05);border-color:rgba(244,63,94,.25);border-left-color:var(--rose-500)}
+.callout.rose i{color:var(--rose-500)}
 
 /* FORMAT HINT */
 .format-hint{margin-top:1rem;padding-top:1rem;border-top:1px dashed rgba(99,102,241,.25);font-family:var(--mono);font-size:.82rem;color:var(--indigo-400)}
@@ -100,6 +114,9 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
   background-image:radial-gradient(rgba(30,41,59,.7) 1px,transparent 1px);background-size:20px 20px}
 .graph-half-label{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-600);font-family:var(--mono);margin-bottom:.6rem;align-self:flex-start}
 
+/* DEPTH HINT */
+.depth-note{display:inline-flex;align-items:center;gap:.4rem;font-size:.75rem;font-family:var(--mono);color:var(--rose-400);background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.2);border-radius:.4rem;padding:.3rem .6rem;margin-top:.6rem}
+
 /* ANIMATIONS */
 @keyframes fade-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 .prob-card{animation:fade-in .5s ease-out both}
@@ -108,10 +125,14 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
 .prob-card:nth-child(3){animation-delay:.19s}
 .prob-card:nth-child(4){animation-delay:.26s}
 
-/* Legend */
-.legend{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem}
-.legend-item{display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--muted)}
-.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* WORST CASE BARS */
+.wc-compare{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+.wc-card{background:var(--slate-950);border:1px solid var(--border2);border-radius:.75rem;padding:1rem}
+.wc-title{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-600);font-family:var(--mono);margin-bottom:.5rem}
+.wc-stat{font-size:1.4rem;font-weight:700;font-family:var(--mono)}
+.wc-stat.danger{color:var(--rose-400)}
+.wc-stat.safe{color:var(--emerald-400)}
+.wc-desc{font-size:.75rem;color:var(--muted);margin-top:.25rem}
 </style>
 </head>
 <body>
@@ -136,7 +157,7 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
   <header class="page-header">
     <span class="badge"><i class="fa-solid fa-flask" style="margin-right:.35rem"></i>Problem Set</span>
     <h1 class="page-title">Topological Sorting</h1>
-    <p class="page-desc">Solve the following problems, showing your step-by-step algorithmic trace where applicable. Assume neighbor iteration processes in numerical/alphabetical order unless stated otherwise.</p>
+    <p class="page-desc">Solve the following problems by tracing the DFS post-order algorithm. Show all steps where asked. Neighbor iteration processes in ascending numerical or alphabetical order unless stated otherwise.</p>
     <div class="header-meta">
       <span class="meta-chip"><i class="fa-solid fa-layer-group" style="color:var(--indigo-400)"></i>4 Problems</span>
       <span class="meta-chip"><i class="fa-solid fa-clock" style="color:var(--sky-400)"></i>Algorithm: DFS Post-Order</span>
@@ -156,6 +177,9 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
       <marker id="arr-sky" viewBox="0 0 10 10" refX="30" refY="5" markerWidth="6" markerHeight="6" orient="auto">
         <path d="M0 0 L10 5 L0 10z" fill="#38bdf8"/>
       </marker>
+      <marker id="arr-indigo" viewBox="0 0 10 10" refX="30" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L10 5 L0 10z" fill="#6366f1"/>
+      </marker>
     </defs>
   </svg>
 
@@ -166,64 +190,65 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
       <div class="prob-header">
         <div class="prob-title-wrap">
           <span class="prob-num">01</span>
-          <h2 class="prob-name">The Deep Forest Trace</h2>
+          <h2 class="prob-name">The Build System Trace</h2>
         </div>
-        <span class="topic-tag">POST-ORDER &amp; VISITED TRACKING</span>
+        <span class="topic-tag">POST-ORDER · VISITED TRACKING · WORST-CASE DEPTH</span>
       </div>
       <div class="prob-body">
-        <p class="prob-text">A software project's build dependencies are mapped below. Notice the cross-dependencies in the main block and the <strong style="color:var(--text)">independent module (Nodes 7, 8, 9)</strong>. The algorithm uses an outer <code>for each node</code> loop that checks nodes from 1 → 9 in order.</p>
+        <p class="prob-text">A software project maps its build dependencies below. The graph has <strong style="color:var(--text)">two disconnected components</strong>. The outer loop iterates nodes in ascending order (1 → 9). Solid lines are Component 1; dashed-circle nodes form the isolated Component 2.</p>
 
-        <div class="graph-box" style="min-height:200px">
+        <div class="graph-box" style="min-height:210px">
           <span class="graph-label">Dependency Graph — 9 Nodes, 2 Components</span>
-          <svg viewBox="0 0 660 190" style="max-width:100%;width:100%;overflow:visible">
-            <!-- Legend dots -->
+          <svg viewBox="0 0 660 200" style="max-width:100%;width:100%;overflow:visible">
             <!-- Component 1 edges -->
-            <line x1="60" y1="95" x2="155" y2="40" class="e-base" marker-end="url(#arr)"/>
-            <line x1="60" y1="95" x2="155" y2="152" class="e-base" marker-end="url(#arr)"/>
-            <line x1="182" y1="40" x2="263" y2="40" class="e-base" marker-end="url(#arr)"/>
-            <line x1="182" y1="152" x2="263" y2="40" class="e-base" marker-end="url(#arr)"/>
-            <line x1="182" y1="152" x2="263" y2="152" class="e-base" marker-end="url(#arr)"/>
-            <line x1="290" y1="40" x2="365" y2="95" class="e-base" marker-end="url(#arr)"/>
-            <line x1="290" y1="152" x2="365" y2="95" class="e-base" marker-end="url(#arr)"/>
-            <!-- Component 2 edges (dashed style) -->
-            <line x1="472" y1="95" x2="560" y2="42" class="e-base" stroke-dasharray="4 3" marker-end="url(#arr)"/>
-            <line x1="472" y1="95" x2="560" y2="150" class="e-base" stroke-dasharray="4 3" marker-end="url(#arr)"/>
-
+            <line x1="60" y1="95" x2="160" y2="42" class="e-base" marker-end="url(#arr)"/>
+            <line x1="60" y1="95" x2="160" y2="148" class="e-base" marker-end="url(#arr)"/>
+            <line x1="185" y1="42" x2="268" y2="42" class="e-base" marker-end="url(#arr)"/>
+            <line x1="185" y1="148" x2="268" y2="42" class="e-base" marker-end="url(#arr)"/>
+            <line x1="185" y1="148" x2="268" y2="148" class="e-base" marker-end="url(#arr)"/>
+            <line x1="293" y1="42" x2="372" y2="95" class="e-base" marker-end="url(#arr)"/>
+            <line x1="293" y1="148" x2="372" y2="95" class="e-base" marker-end="url(#arr)"/>
+            <!-- Separator -->
+            <line x1="426" y1="15" x2="426" y2="185" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <text x="426" y="8" fill="#334155" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">DISCONNECTED</text>
+            <!-- Component 2 edges (dashed) -->
+            <line x1="480" y1="95" x2="570" y2="42" class="e-base" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+            <line x1="480" y1="95" x2="570" y2="148" class="e-base" stroke-dasharray="4 3" marker-end="url(#arr)"/>
             <!-- Component 1 Nodes -->
             <g class="n-primary">
-              <circle cx="60" cy="95" r="25"/>
-              <text x="60" y="95" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#818cf8">1</text>
+              <circle cx="60" cy="95" r="24"/>
+              <text x="60" y="95" fill="#818cf8">1</text>
             </g>
-            <g class="n-base"><circle cx="168" cy="40" r="25"/><text x="168" y="40" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">2</text></g>
-            <g class="n-base"><circle cx="168" cy="152" r="25"/><text x="168" y="152" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">4</text></g>
-            <g class="n-base"><circle cx="276" cy="40" r="25"/><text x="276" y="40" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">3</text></g>
-            <g class="n-base"><circle cx="276" cy="152" r="25"/><text x="276" y="152" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">5</text></g>
-            <g class="n-base"><circle cx="378" cy="95" r="25"/><text x="378" y="95" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">6</text></g>
-
-            <!-- Separator line -->
-            <line x1="428" y1="20" x2="428" y2="170" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="6 4"/>
-            <text x="428" y="8" fill="#334155" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">DISCONNECTED</text>
-
-            <!-- Component 2 Nodes (dashed) -->
-            <g class="n-dashed"><circle cx="455" cy="95" r="25"/><text x="455" y="95" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#475569">7</text></g>
-            <g class="n-dashed"><circle cx="572" cy="40" r="25"/><text x="572" y="40" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#475569">8</text></g>
-            <g class="n-dashed"><circle cx="572" cy="152" r="25"/><text x="572" y="152" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#475569">9</text></g>
-
-            <!-- Component labels -->
-            <text x="220" y="185" fill="#334155" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace">Component 1: Nodes 1–6</text>
-            <text x="513" y="185" fill="#334155" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace">Component 2: Nodes 7–9</text>
+            <g class="n-base"><circle cx="172" cy="42" r="24"/><text x="172" y="42" fill="#94a3b8">2</text></g>
+            <g class="n-base"><circle cx="172" cy="148" r="24"/><text x="172" y="148" fill="#94a3b8">4</text></g>
+            <g class="n-base"><circle cx="280" cy="42" r="24"/><text x="280" y="42" fill="#94a3b8">3</text></g>
+            <g class="n-base"><circle cx="280" cy="148" r="24"/><text x="280" y="148" fill="#94a3b8">5</text></g>
+            <g class="n-base"><circle cx="385" cy="95" r="24"/><text x="385" y="95" fill="#94a3b8">6</text></g>
+            <!-- Component 2 nodes (dashed/isolated) -->
+            <g class="n-dashed"><circle cx="460" cy="95" r="24"/><text x="460" y="95" fill="#475569">7</text></g>
+            <g class="n-dashed"><circle cx="582" cy="42" r="24"/><text x="582" y="42" fill="#475569">8</text></g>
+            <g class="n-dashed"><circle cx="582" cy="148" r="24"/><text x="582" y="148" fill="#475569">9</text></g>
+            <!-- Labels -->
+            <text x="220" y="190" fill="#334155" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace">Component 1 — Nodes 1–6</text>
+            <text x="521" y="190" fill="#334155" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace">Component 2 — Nodes 7–9</text>
           </svg>
         </div>
 
+        <div class="callout">
+          <i class="fa-solid fa-info-circle"></i>
+          <span>Edges: <strong style="color:var(--text)">1→2, 1→4, 2→3, 4→3, 4→5, 3→6, 5→6</strong> (Component 1) and <strong style="color:var(--text)">7→8, 7→9</strong> (Component 2).</span>
+        </div>
+
         <div class="task-box">
-          <strong>Task A:</strong> List the exact sequence of nodes that trigger a completely new <code>dfs()</code> call from the main algorithm's outer <code>for</code> loop. (Exclude nodes visited recursively from within another <code>dfs()</code> call.)
-          <br><br>
-          <strong>Task B:</strong> Execute a full manual trace. Provide the exact order all 9 nodes are <em>pushed to the output stack</em>, then write the final Topological Sequence (reading the stack from top to bottom).
+          <strong>Task A:</strong> List the exact nodes that trigger a completely new <code>dfs()</code> call from the outer <code>for</code> loop (i.e., nodes that were <em>not</em> already visited recursively when the outer loop reaches them).<br><br>
+          <strong>Task B:</strong> Execute a full manual DFS trace. Provide the exact order all 9 nodes are <em>pushed to the output stack</em>, then write the final topological sequence (read the stack from top → bottom).<br><br>
+          <strong>Task C (Worst-Case Depth):</strong> What is the maximum number of <em>concurrently active</em> DFS call frames at any single point during execution? Identify the exact sequence of recursive calls that achieves this maximum depth.
           <div class="format-hint">
             <strong>Expected Answer Format:</strong>
-            Task A Outer Loop Triggers: <span class="ph">[ _, _ ]</span><br>
-            Task B Push Order: <span class="ph">[ _, _, _, _, _, _, _, _, _ ]</span><br>
-            Task B Final Sequence: <span class="ph">[ _, _, _, _, _, _, _, _, _ ]</span>
+            Task A — Outer Loop Triggers: <span class="ph">[ _, _ ]</span><br>
+            Task B — Push Order: <span class="ph">[ _, _, _, _, _, _, _, _, _ ]</span><br>
+            Task B — Final Topo Sequence: <span class="ph">[ _ → _ → _ → _ → _ → _ → _ → _ → _ ]</span><br>
+            Task C — Max Active Frames: <span class="ph">[ Number ]</span> — Path: <span class="ph">dfs(_) → dfs(_) → dfs(_) → dfs(_)</span>
           </div>
         </div>
       </div>
@@ -234,45 +259,53 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
       <div class="prob-header">
         <div class="prob-title-wrap">
           <span class="prob-num">02</span>
-          <h2 class="prob-name">The Deep Deadlock</h2>
+          <h2 class="prob-name">The Hidden Deadlock</h2>
         </div>
-        <span class="topic-tag">RECURSION STACK TRACKING</span>
+        <span class="topic-tag">CYCLE DETECTION · RECURSION STACK · WHAT-IF ANALYSIS</span>
       </div>
       <div class="prob-body">
-        <p class="prob-text">A continuous integration pipeline attempts to compile five microservices. The automated topological sort (starting at node <strong style="color:var(--text)">A</strong>) crashes with a <strong style="color:var(--rose-400)">"Cyclic Dependency Detected"</strong> error. The back edge is shown in red.</p>
+        <p class="prob-text">A CI/CD pipeline attempts topological sort on five microservices. The algorithm crashes with <strong style="color:var(--rose-400)">"CyclicDependencyError"</strong>. Unlike a simple chain cycle, this graph has a <strong style="color:var(--text)">fork-then-merge</strong> structure, meaning not all nodes are visited by the time the cycle is detected.</p>
 
-        <div class="graph-box" style="min-height:155px">
-          <span class="graph-label">CI Pipeline Graph — Cycle: E → C</span>
-          <svg viewBox="0 0 600 130" style="max-width:100%;width:100%;overflow:visible">
+        <div class="graph-box" style="min-height:180px">
+          <span class="graph-label">Pipeline Dependency Graph — Hidden Cycle: B → D → E → B</span>
+          <svg viewBox="0 0 580 168" style="max-width:100%;width:100%;overflow:visible">
             <!-- Forward edges -->
-            <line x1="58" y1="65" x2="148" y2="65" class="e-base" marker-end="url(#arr)"/>
-            <line x1="178" y1="65" x2="268" y2="65" class="e-base" marker-end="url(#arr)"/>
-            <line x1="298" y1="65" x2="388" y2="65" class="e-base" marker-end="url(#arr)"/>
-            <line x1="418" y1="65" x2="508" y2="65" class="e-base" marker-end="url(#arr)"/>
-            <!-- Back edge: E → C (curves below) -->
-            <path d="M 533 78 Q 415 122 298 78" class="e-danger" marker-end="url(#arr-danger)"/>
-
+            <line x1="55" y1="85" x2="162" y2="40" class="e-base" marker-end="url(#arr)"/>
+            <line x1="55" y1="85" x2="162" y2="130" class="e-base" marker-end="url(#arr)"/>
+            <line x1="196" y1="40" x2="295" y2="85" class="e-base" marker-end="url(#arr)"/>
+            <line x1="196" y1="130" x2="295" y2="85" class="e-base" marker-end="url(#arr)"/>
+            <line x1="320" y1="85" x2="420" y2="85" class="e-base" marker-end="url(#arr)"/>
+            <!-- Back edge: E → B (curves above — the hidden cycle!) -->
+            <path d="M 443 63 Q 318 -8 198 38" class="e-danger" fill="none" marker-end="url(#arr-danger)"/>
             <!-- Nodes -->
-            <g class="n-primary"><circle cx="35" cy="65" r="22"/><text x="35" y="65" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#818cf8">A</text></g>
-            <g class="n-base"><circle cx="163" cy="65" r="22"/><text x="163" y="65" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">B</text></g>
-            <g class="n-base"><circle cx="283" cy="65" r="22"/><text x="283" y="65" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">C</text></g>
-            <g class="n-base"><circle cx="403" cy="65" r="22"/><text x="403" y="65" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#94a3b8">D</text></g>
-            <g class="n-danger"><circle cx="523" cy="65" r="22"/><text x="523" y="65" text-anchor="middle" dominant-baseline="central" dy=".05em" fill="#fb7185">E</text></g>
-
+            <g class="n-primary"><circle cx="32" cy="85" r="22"/><text x="32" y="85" fill="#818cf8">A</text></g>
+            <g class="n-base"><circle cx="178" cy="40" r="22"/><text x="178" y="40" fill="#94a3b8">B</text></g>
+            <g class="n-base"><circle cx="178" cy="130" r="22"/><text x="178" y="130" fill="#94a3b8">C</text></g>
+            <g class="n-base"><circle cx="308" cy="85" r="22"/><text x="308" y="85" fill="#94a3b8">D</text></g>
+            <g class="n-danger"><circle cx="443" cy="85" r="22"/><text x="443" y="85" fill="#fb7185">E</text></g>
             <!-- Labels -->
-            <text x="415" y="120" fill="#f43f5e" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace" opacity=".8">back edge — creates cycle</text>
+            <text x="318" y="15" fill="#f43f5e" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace" opacity=".9">back edge E → B (creates cycle)</text>
           </svg>
         </div>
 
+        <div class="callout rose">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>Edges: <strong style="color:var(--text)">A→B, A→C, B→D, C→D, D→E, E→B</strong>. DFS starts from node <strong style="color:var(--text)">A</strong>. Recall: only nodes in the <em>active recursion stack</em> trigger a cycle error — nodes that are merely in the <em>visited</em> set do not.</span>
+        </div>
+
         <div class="task-box">
-          <strong>Task:</strong> Standard <code>Visited</code> arrays alone are insufficient — this requires an <code>Active Recursion Stack</code>. At the exact microsecond the algorithm evaluates the back edge <strong style="color:var(--rose-400)">(E → C)</strong> and throws the cycle error, list the exact contents of:
+          <strong>Task A:</strong> At the exact moment the back edge <strong style="color:var(--rose-400)">(E → B)</strong> is evaluated and the error is thrown, list the exact contents of both tracking structures. Note: <em>not all nodes are visited yet when this occurs.</em>
           <br><br>
-          1. The permanent <code>Visited</code> Set (all nodes seen so far).<br>
-          2. The temporary <code>Active Recursion Stack</code> array (currently active frames only).
+          1. The permanent <code>Visited</code> Set (all nodes marked visited so far).<br>
+          2. The temporary <code>Active Recursion Stack</code> (frames currently on the call stack).<br><br>
+          <strong>Task B (What-If Analysis):</strong> The back edge <strong style="color:var(--rose-400)">E→B</strong> is removed. Execute DFS on the resulting acyclic graph (alphabetical neighbor order). Provide the exact topological sequence.<br><br>
+          <strong>Task C (Proof):</strong> Without running the algorithm, prove that the <em>original graph</em> (with E→B) has no valid topological ordering. Show the specific dependency contradiction that makes it impossible.
           <div class="format-hint">
             <strong>Expected Answer Format:</strong>
-            1. Visited Set: <span class="ph">{ _, _, _, _, _ }</span><br>
-            2. Recursion Stack: <span class="ph">[ _, _, _, _, _ ]</span>
+            Task A — Visited Set: <span class="ph">{ _, _, _, _ }</span><br>
+            Task A — Recursion Stack: <span class="ph">[ _, _, _, _ ]</span><br>
+            Task B — Topo Sequence: <span class="ph">[ _ → _ → _ → _ → _ ]</span><br>
+            Task C — Contradiction: <span class="ph">( _ must precede _ ) AND ( _ must precede _ ) ... → impossible because ...</span>
           </div>
         </div>
       </div>
@@ -283,71 +316,54 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
       <div class="prob-header">
         <div class="prob-title-wrap">
           <span class="prob-num">03</span>
-          <h2 class="prob-name">Alternative Configurations</h2>
+          <h2 class="prob-name">The Double Diamond</h2>
         </div>
-        <span class="topic-tag">ADJACENCY LIST MECHANICS</span>
+        <span class="topic-tag">MULTIPLE VALID ORDERINGS · ADJACENCY LIST MECHANICS</span>
       </div>
       <div class="prob-body">
-        <p class="prob-text">You are managing an assembly line mapped by the graph below. Notice that <strong style="color:var(--text)">two independent sources (T1 and T2)</strong> both converge into a shared intermediate stage (T3 and T4), which both converge to <strong style="color:var(--text)">End</strong>.</p>
+        <p class="prob-text">An assembly pipeline has one source (S), two parallel intermediate stages (A and B), a shared synchronization point (T), and two independent final outputs (X and Y). This structure — a "double diamond" — produces <strong style="color:var(--text)">multiple equally valid orderings</strong> depending on how neighbors are iterated.</p>
 
-        <div class="graph-box" style="min-height:195px">
-          <span class="graph-label">Assembly Line Graph — Bipartite Merge (T1,T2 → T3,T4 → End)</span>
-          <svg viewBox="0 0 460 180" style="max-width:100%;width:100%;overflow:visible">
-            <!-- ─── straight horizontal edges ─── -->
-            <!-- T1 → T3 (top straight) -->
-            <line x1="86" y1="55" x2="204" y2="55" class="e-base" marker-end="url(#arr)"/>
-            <!-- T2 → T4 (bottom straight) -->
-            <line x1="86" y1="130" x2="204" y2="130" marker-end="url(#arr)" stroke="#475569" stroke-width="1.8" fill="none"/>
-
-            <!-- ─── cross edges (curved so they don't look like one line) ─── -->
-            <!-- T1 → T4 (curves downward) -->
-            <path d="M 75 68 C 140 105 165 115 204 123" class="e-base" marker-end="url(#arr)" stroke="#38bdf8" stroke-opacity=".55"/>
-            <!-- T2 → T3 (curves upward) -->
-            <path d="M 75 117 C 140 80 165 68 204 62" class="e-base" marker-end="url(#arr)" stroke="#6366f1" stroke-opacity=".55"/>
-
-            <!-- ─── convergence to End ─── -->
-            <line x1="259" y1="55" x2="360" y2="87" class="e-base" marker-end="url(#arr)"/>
-            <line x1="259" y1="130" x2="360" y2="100" class="e-base" marker-end="url(#arr)"/>
-
-            <!-- ─── Nodes ─── -->
-            <g class="n-secondary">
-              <circle cx="60" cy="55" r="26"/>
-              <text x="60" y="55" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="13" font-weight="700" fill="#38bdf8">T1</text>
-            </g>
-            <g class="n-secondary">
-              <circle cx="60" cy="130" r="26"/>
-              <text x="60" y="130" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="13" font-weight="700" fill="#38bdf8">T2</text>
-            </g>
-            <g class="n-base">
-              <circle cx="232" cy="55" r="26"/>
-              <text x="232" y="55" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="13" font-weight="700" fill="#94a3b8">T3</text>
-            </g>
-            <g class="n-base">
-              <circle cx="232" cy="130" r="26"/>
-              <text x="232" y="130" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="13" font-weight="700" fill="#94a3b8">T4</text>
-            </g>
-            <g class="n-base">
-              <circle cx="386" cy="92" r="28"/>
-              <text x="386" y="92" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="11" font-weight="700" fill="#94a3b8">End</text>
-            </g>
-
-            <!-- ─── Edge labels ─── -->
-            <text x="143" y="45" fill="#475569" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">T1→T3</text>
-            <text x="143" y="143" fill="#475569" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">T2→T4</text>
-            <text x="155" y="102" fill="#38bdf8" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace" opacity=".7">T1→T4</text>
-            <text x="120" y="79" fill="#6366f1" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace" opacity=".7">T2→T3</text>
+        <div class="graph-box" style="min-height:185px">
+          <span class="graph-label">Pipeline Graph — S → {A,B} → T → {X,Y}</span>
+          <svg viewBox="0 0 505 172" style="max-width:100%;width:100%;overflow:visible">
+            <!-- Edges -->
+            <line x1="55" y1="85" x2="172" y2="40" class="e-base" marker-end="url(#arr)"/>
+            <line x1="55" y1="85" x2="172" y2="130" class="e-base" marker-end="url(#arr)"/>
+            <line x1="206" y1="40" x2="296" y2="85" class="e-base" marker-end="url(#arr)"/>
+            <line x1="206" y1="130" x2="296" y2="85" class="e-base" marker-end="url(#arr)"/>
+            <line x1="320" y1="85" x2="430" y2="40" class="e-base" marker-end="url(#arr)"/>
+            <line x1="320" y1="85" x2="430" y2="130" class="e-base" marker-end="url(#arr)"/>
+            <!-- Nodes -->
+            <g class="n-primary"><circle cx="32" cy="85" r="22"/><text x="32" y="85" fill="#818cf8">S</text></g>
+            <g class="n-base"><circle cx="189" cy="40" r="22"/><text x="189" y="40" fill="#94a3b8">A</text></g>
+            <g class="n-base"><circle cx="189" cy="130" r="22"/><text x="189" y="130" fill="#94a3b8">B</text></g>
+            <g class="n-secondary"><circle cx="308" cy="85" r="22"/><text x="308" y="85" fill="#38bdf8">T</text></g>
+            <g class="n-base"><circle cx="452" cy="40" r="22"/><text x="452" y="40" fill="#94a3b8">X</text></g>
+            <g class="n-base"><circle cx="452" cy="130" r="22"/><text x="452" y="130" fill="#94a3b8">Y</text></g>
+            <!-- Role labels -->
+            <text x="32" y="118" fill="#6366f1" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">source</text>
+            <text x="308" y="118" fill="#38bdf8" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">sync</text>
+            <text x="452" y="10" fill="#475569" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">leaf</text>
+            <text x="452" y="162" fill="#475569" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">leaf</text>
           </svg>
         </div>
 
+        <div class="callout">
+          <i class="fa-solid fa-info-circle"></i>
+          <span>Edges: <strong style="color:var(--text)">S→A, S→B, A→T, B→T, T→X, T→Y</strong>. The outer loop starts at S (the only unvisited source). T requires <em>both</em> A and B to be complete before it can proceed.</span>
+        </div>
+
         <div class="task-box">
-          <strong>Task A:</strong> Provide <strong>three</strong> mathematically valid topological sequences for this graph.<br><br>
-          <strong>Task B:</strong> Assume the adjacency list is modified to process neighbors in strict <strong>reverse-numerical order</strong> (T1 visits T4 before T3; T2 visits T4 before T3). Write the exact single sequence the DFS algorithm produces under this condition.
+          <strong>Task A (Standard DFS):</strong> Execute DFS with <em>alphabetical</em> neighbor ordering (S visits A before B; T visits X before Y). Provide the exact push order and the final topological sequence.<br><br>
+          <strong>Task B (Reverse DFS):</strong> Now execute DFS with <em>reverse-alphabetical</em> neighbor ordering (S visits B before A; T visits Y before X). Provide the exact push order and the final topological sequence.<br><br>
+          <strong>Task C (Count Orderings):</strong> How many <em>distinct, mathematically valid</em> topological orderings exist for this graph in total? List all of them.
           <div class="format-hint">
             <strong>Expected Answer Format:</strong>
-            Task A — Sequence 1: <span class="ph">[ _, _, _, _, End ]</span><br>
-            Task A — Sequence 2: <span class="ph">[ _, _, _, _, End ]</span><br>
-            Task A — Sequence 3: <span class="ph">[ _, _, _, _, End ]</span><br><br>
-            Task B — Exact Output: <span class="ph">[ _, _, _, _, End ]</span>
+            Task A — Push Order: <span class="ph">[ _, _, _, _, _, _ ]</span><br>
+            Task A — Topo Sequence: <span class="ph">[ _ → _ → _ → _ → _ → _ ]</span><br>
+            Task B — Push Order: <span class="ph">[ _, _, _, _, _, _ ]</span><br>
+            Task B — Topo Sequence: <span class="ph">[ _ → _ → _ → _ → _ → _ ]</span><br>
+            Task C — Total Distinct Orderings: <span class="ph">[ Number ]</span> — List: <span class="ph">( all of them )</span>
           </div>
         </div>
       </div>
@@ -358,51 +374,68 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
       <div class="prob-header">
         <div class="prob-title-wrap">
           <span class="prob-num">04</span>
-          <h2 class="prob-name">Complexity &amp; Recursion Bounds</h2>
+          <h2 class="prob-name">The Stack Overflow Threat</h2>
         </div>
-        <span class="topic-tag">SPACE COMPLEXITY O(V)</span>
+        <span class="topic-tag">WORST-CASE SPACE COMPLEXITY · RECURSION DEPTH · O(V)</span>
       </div>
       <div class="prob-body">
-        <p class="prob-text">The algorithm's Space Complexity is bounded by <code>O(V)</code> — memory consumed by the <code>Visited</code> array, the output <code>Stack</code>, and the call stack's recursion frames. Two topologically distinct graph structures are given below.</p>
+        <p class="prob-text">The algorithm's worst-case space complexity is <code>O(V)</code> for the active recursion stack. But <em>not all graphs with V vertices reach this depth.</em> The two graph structures below have the same number of nodes but produce dramatically different recursion stack depths — with real-world consequences.</p>
 
         <div class="graph-split">
           <div class="graph-half">
-            <div class="graph-half-label">Graph A — Deep Chain</div>
-            <svg viewBox="0 0 280 50" style="width:100%;max-width:280px;overflow:visible">
-              <line x1="42" y1="25" x2="102" y2="25" class="e-base" marker-end="url(#arr)"/>
-              <line x1="122" y1="25" x2="182" y2="25" class="e-base" marker-end="url(#arr)"/>
-              <line x1="202" y1="25" x2="262" y2="25" class="e-base" marker-end="url(#arr)"/>
-              <g class="n-base"><circle cx="22" cy="25" r="18"/><text x="22" y="25" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#94a3b8">A</text></g>
-              <g class="n-base"><circle cx="112" cy="25" r="18"/><text x="112" y="25" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#94a3b8">B</text></g>
-              <g class="n-base"><circle cx="192" cy="25" r="18"/><text x="192" y="25" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#94a3b8">C</text></g>
-              <g class="n-base"><circle cx="272" cy="25" r="18"/><text x="272" y="25" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#94a3b8">D</text></g>
+            <div class="graph-half-label">Graph A — Deep Chain (Worst Case)</div>
+            <svg viewBox="0 0 320 54" style="width:100%;max-width:320px;overflow:visible">
+              <defs><marker id="arr-chain" viewBox="0 0 10 10" refX="24" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker></defs>
+              <line x1="38" y1="27" x2="88" y2="27" class="e-base" marker-end="url(#arr-chain)"/>
+              <line x1="118" y1="27" x2="168" y2="27" class="e-base" marker-end="url(#arr-chain)"/>
+              <line x1="198" y1="27" x2="248" y2="27" class="e-base" marker-end="url(#arr-chain)"/>
+              <line x1="278" y1="27" x2="292" y2="27" class="e-base" stroke-dasharray="3 2" marker-end="url(#arr-chain)"/>
+              <g class="n-primary"><circle cx="20" cy="27" r="18"/><text x="20" y="27" fill="#818cf8" font-size="11">A</text></g>
+              <g class="n-base"><circle cx="103" cy="27" r="18"/><text x="103" y="27" fill="#94a3b8" font-size="11">B</text></g>
+              <g class="n-base"><circle cx="183" cy="27" r="18"/><text x="183" y="27" fill="#94a3b8" font-size="11">C</text></g>
+              <g class="n-base"><circle cx="263" cy="27" r="18"/><text x="263" y="27" fill="#94a3b8" font-size="11">D</text></g>
+              <text x="300" y="30" fill="#475569" font-size="10" font-family="'Fira Code',monospace">…N</text>
             </svg>
-            <p style="font-size:.7rem;color:var(--slate-600);font-family:var(--mono);margin-top:.6rem">A → B → C → D (linear)</p>
+            <p style="font-size:.7rem;color:var(--slate-600);font-family:var(--mono);margin-top:.5rem">A → B → C → D → … → N</p>
+            <div class="depth-note"><i class="fa-solid fa-skull" style="font-size:.65rem"></i> depth grows with N</div>
           </div>
           <div class="graph-half">
-            <div class="graph-half-label">Graph B — Wide Fan</div>
-            <svg viewBox="0 0 220 120" style="width:100%;max-width:220px;overflow:visible">
-              <line x1="110" y1="28" x2="48" y2="90" class="e-base" marker-end="url(#arr)"/>
-              <line x1="110" y1="28" x2="110" y2="84" class="e-base" marker-end="url(#arr)"/>
-              <line x1="110" y1="28" x2="172" y2="90" class="e-base" marker-end="url(#arr)"/>
-              <g class="n-primary"><circle cx="110" cy="22" r="20"/><text x="110" y="22" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#818cf8">A</text></g>
-              <g class="n-base"><circle cx="38" cy="100" r="20"/><text x="38" y="100" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#94a3b8">B</text></g>
-              <g class="n-base"><circle cx="110" cy="100" r="20"/><text x="110" y="100" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#94a3b8">C</text></g>
-              <g class="n-base"><circle cx="182" cy="100" r="20"/><text x="182" y="100" text-anchor="middle" dominant-baseline="central" dy=".05em" font-family="'Inter',sans-serif" font-size="12" font-weight="700" fill="#94a3b8">D</text></g>
+            <div class="graph-half-label">Graph B — Wide Star (Best Depth Case)</div>
+            <svg viewBox="0 0 200 200" style="width:100%;max-width:180px;overflow:visible">
+              <line x1="100" y1="88" x2="100" y2="30" class="e-base" marker-end="url(#arr-chain)"/>
+              <line x1="100" y1="100" x2="168" y2="65" class="e-base" marker-end="url(#arr-chain)"/>
+              <line x1="100" y1="112" x2="168" y2="148" class="e-base" marker-end="url(#arr-chain)"/>
+              <line x1="100" y1="112" x2="32" y2="148" class="e-base" marker-end="url(#arr-chain)"/>
+              <line x1="100" y1="100" x2="32" y2="65" class="e-base" marker-end="url(#arr-chain)"/>
+              <g class="n-primary"><circle cx="100" cy="100" r="22"/><text x="100" y="100" fill="#818cf8" font-size="11">A</text></g>
+              <g class="n-base"><circle cx="100" cy="22" r="16"/><text x="100" y="22" fill="#94a3b8" font-size="11">B</text></g>
+              <g class="n-base"><circle cx="178" cy="60" r="16"/><text x="178" y="60" fill="#94a3b8" font-size="11">C</text></g>
+              <g class="n-base"><circle cx="178" cy="152" r="16"/><text x="178" y="152" fill="#94a3b8" font-size="11">D</text></g>
+              <g class="n-base"><circle cx="22" cy="152" r="16"/><text x="22" y="152" fill="#94a3b8" font-size="11">E</text></g>
+              <g class="n-base"><circle cx="22" cy="60" r="16"/><text x="22" y="60" fill="#94a3b8" font-size="11">F</text></g>
             </svg>
-            <p style="font-size:.7rem;color:var(--slate-600);font-family:var(--mono);margin-top:.6rem">A → {B, C, D} (one-to-many)</p>
+            <p style="font-size:.7rem;color:var(--slate-600);font-family:var(--mono);margin-top:.5rem">A → {B, C, D, E, F, …}</p>
+            <div class="depth-note" style="color:var(--emerald-400);background:rgba(16,185,129,.08);border-color:rgba(16,185,129,.2)"><i class="fa-solid fa-shield-halved" style="font-size:.65rem"></i> depth stays constant</div>
           </div>
         </div>
 
         <div class="task-box">
-          <strong>Task A:</strong> State the exact maximum depth (number of concurrent active call frames) of the Recursion Stack when processing <strong>Graph A</strong>.<br><br>
-          <strong>Task B:</strong> State the exact maximum depth when processing <strong>Graph B</strong>.<br><br>
-          <strong>Task C:</strong> A massive network graph has exactly <strong>2,500 vertices</strong> structured as a single deep chain (like Graph A, but 2,500 nodes). What is the exact number of elements stored in the <code>Active Recursion Stack</code> at the deepest point of execution?
+          <strong>Task A:</strong> For <strong>Graph A</strong> (chain of 6 nodes A→B→C→D→E→F), what is the exact maximum number of active call frames in the recursion stack at peak depth? Which call chain achieves this?<br><br>
+          <strong>Task B:</strong> For <strong>Graph B</strong> (star: A→{B,C,D,E,F}), what is the exact maximum recursion stack depth? Which call chain achieves this?<br><br>
+          <strong>Task C (Production Scenario):</strong> A package manager runs DFS-based topological sort on <strong>10,000 packages</strong> with a single linear chain of dependencies (structured like Graph A). Assume each recursive call frame occupies <strong>1 KB</strong> of stack memory. The runtime's call stack limit is <strong>8 MB</strong>.
+          <br><br>
+          &nbsp;&nbsp;&nbsp;i. How many frames are active in the recursion stack at peak depth?<br>
+          &nbsp;&nbsp;&nbsp;ii. How much total stack memory does this consume?<br>
+          &nbsp;&nbsp;&nbsp;iii. Does this exceed the 8 MB limit? Does a stack overflow occur?<br><br>
+          <strong>Task D:</strong> If those same 10,000 packages were restructured as a star (Graph B pattern — one root with 9,999 direct leaves), what would the peak recursion depth be? Why is this structurally safe?
           <div class="format-hint">
             <strong>Expected Answer Format:</strong>
-            Task A — Max Depth: <span class="ph">[ Number ]</span><br>
-            Task B — Max Depth: <span class="ph">[ Number ]</span><br>
-            Task C — Max Elements at Deepest Point: <span class="ph">[ Number ]</span>
+            Task A — Peak Frames: <span class="ph">[ Number ]</span> — Chain: <span class="ph">dfs(_) → dfs(_) → … → dfs(_)</span><br>
+            Task B — Peak Frames: <span class="ph">[ Number ]</span> — Chain: <span class="ph">dfs(_) → dfs(_)</span><br>
+            Task C.i — Frames at Peak: <span class="ph">[ Number ]</span><br>
+            Task C.ii — Memory: <span class="ph">[ Value ] KB / MB</span><br>
+            Task C.iii — Stack Overflow: <span class="ph">YES / NO</span><br>
+            Task D — Peak Depth: <span class="ph">[ Number ]</span> — Reason: <span class="ph">( explanation )</span>
           </div>
         </div>
       </div>
