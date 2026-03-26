@@ -134,6 +134,50 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
 .wc-stat.danger{color:var(--rose-400)}
 .wc-stat.safe{color:var(--emerald-400)}
 .wc-desc{font-size:.75rem;color:var(--muted);margin-top:.25rem}
+
+/* ══ MOBILE ══ */
+@media (max-width:768px) {
+  /* Nav compact */
+  .nav-inner{padding:0 1rem}
+  .nav-brand span{display:none}
+  .nav-link{padding:.4rem .55rem;font-size:.8rem}
+  .nav-link span{display:none}
+  .nav-badge{display:none}
+
+  /* Layout */
+  .page-wrap{padding-top:calc(var(--nav-h) + 1.5rem);padding-left:.75rem;padding-right:.75rem;padding-bottom:3rem}
+  .page-title{font-size:1.7rem}
+  .page-desc{font-size:.88rem}
+  .header-meta{gap:.5rem}
+  .meta-chip{font-size:.72rem;padding:.25rem .55rem}
+
+  /* Problem cards */
+  .prob-header{flex-direction:column;align-items:flex-start;gap:.5rem;padding:.9rem 1rem}
+  .topic-tag{white-space:normal;font-size:.62rem;line-height:1.4}
+  .prob-body{padding:1rem}
+  .prob-text{font-size:.88rem}
+
+  /* Graph boxes */
+  .graph-box{padding:.75rem;min-height:110px}
+  .graph-label{font-size:.58rem}
+
+  /* Grids collapse */
+  .graph-split,.wc-compare{grid-template-columns:1fr}
+
+  /* Task box */
+  .task-box{font-size:.85rem;padding:.85rem 1rem}
+  .format-hint{font-size:.75rem}
+
+  code{font-size:.78em}
+
+  /* Callout */
+  .callout{font-size:.8rem}
+}
+
+@media (max-width:480px) {
+  .prob-name{font-size:.95rem}
+  .graph-box{padding:.5rem}
+}
 </style>
 </head>
 <body>

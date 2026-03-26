@@ -182,6 +182,99 @@ input[type=range]{width:70px;accent-color:var(--indigo-500)}
 .fnode.isolated circle{stroke:var(--slate-600);stroke-dasharray:4 2}
 .fedge{stroke:var(--slate-700);stroke-width:1.5;fill:none;marker-end:url(#arr-f)}
 
+/* ── PROGRESS DOTS ── */
+#progress-dots{position:fixed;right:1rem;top:50%;transform:translateY(-50%);z-index:150;display:flex;flex-direction:column;gap:.45rem}
+.pdot{width:6px;height:6px;border-radius:50%;background:var(--slate-700);transition:all .3s;cursor:pointer}
+.pdot.active{background:var(--indigo-500);transform:scale(1.4)}
+.pdot:hover{background:var(--slate-500)}
+
+/* ── SWIPE HINT (mobile) ── */
+.swipe-hint{display:none;position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);z-index:150;font-size:.72rem;color:var(--slate-600);display:flex;align-items:center;gap:.4rem;pointer-events:none;animation:fade-hint 3s ease-out 1s forwards}
+@keyframes fade-hint{0%{opacity:1}70%{opacity:1}100%{opacity:0}}
+
+/* ══════════════════════════════════════════
+   MOBILE RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width:768px) {
+  /* Body: allow overflow for slide-internal scroll on mobile */
+  body{overflow:auto}
+  #pres{overflow-y:auto;scroll-snap-type:y mandatory;height:100vh}
+
+  /* Nav: compact on mobile */
+  .nav-inner{padding:0 1rem}
+  .nav-brand span{display:none} /* hide brand text, keep icon */
+  .nav-badge,.slide-counter{display:none}
+  .nav-link{padding:.4rem .6rem;font-size:.78rem}
+  .nav-link span{display:none} /* icon only on mobile */
+  .nav-link i{font-size:.9rem}
+
+  /* Progress dots: hide on mobile (too small) */
+  #progress-dots{display:none}
+
+  /* Slides: reduce padding, allow min-height to grow */
+  .slide{padding:1.25rem 1rem;align-items:flex-start;min-height:calc(100vh - var(--nav-h));height:auto}
+  .cw{gap:1.25rem;padding-top:.75rem;padding-bottom:1.5rem}
+
+  /* Typography */
+  h1{font-size:clamp(1.8rem,7vw,2.6rem)}
+  h2{font-size:clamp(1.35rem,5vw,2rem)}
+  h3{font-size:1rem}
+  p,li{font-size:.9rem}
+
+  /* Collapse ALL grids to single column */
+  .g2,.g3,.g4{grid-template-columns:1fr;gap:1rem}
+
+  /* Cards: reduce padding on mobile */
+  .card{padding:1.1rem}
+
+  /* Code blocks: smaller font, horizontal scroll */
+  .code-block{font-size:.75rem;padding:1rem;overflow-x:auto}
+  .code-block pre{white-space:pre;min-width:max-content}
+
+  /* Complexity table: make scrollable */
+  .comp-table{font-size:.78rem}
+  .comp-table th,.comp-table td{padding:.5rem .65rem}
+  .comp-table td:last-child{font-size:.72rem}
+
+  /* DFS Simulation: stack vertically */
+  .sim-layout{grid-template-columns:1fr;height:auto;gap:1rem}
+  .sim-graph{height:260px}
+  .sim-right{gap:.6rem}
+  .sim-panel{padding:.75rem}
+  .call-stack{min-height:50px}
+  .sim-log{font-size:.78rem;min-height:2.5rem}
+  .sim-controls{gap:.4rem}
+  .btn{padding:.55rem .9rem;font-size:.78rem}
+  .speed-wrap{font-size:.7rem}
+  input[type=range]{width:55px}
+
+  /* Cycle animation canvas */
+  .cycle-canvas{height:180px}
+
+  /* Compare cols */
+  .cmp{padding:1.1rem}
+
+  /* Kahn viz: allow wrap */
+  .kahn-viz{gap:.35rem}
+  .kn-circle{width:1.9rem;height:1.9rem;font-size:.78rem}
+
+  /* Step list */
+  .step-num{width:2rem;height:2rem;font-size:.8rem}
+
+  /* Title slide chips: stack them */
+  .slide .cw>div>div[style*="display:flex"][style*="margin-top:2rem"]{flex-direction:column;gap:.5rem}
+}
+
+@media (max-width:480px) {
+  .nav-link{padding:.35rem .5rem}
+  .slide{padding:1rem .8rem}
+  h1{font-size:clamp(1.5rem,8vw,2.2rem)}
+  .sim-graph{height:220px}
+  .cycle-canvas{height:150px}
+  .comp-table td:last-child{display:none} /* hide "Why?" column on very small screens */
+  .comp-table th:last-child{display:none}
+}
+
 </style>
 </head>
 <body>
@@ -200,7 +293,8 @@ input[type=range]{width:70px;accent-color:var(--indigo-500)}
   </div>
 </nav>
 
-<!-- PRESENTATION -->
+<!-- Progress Dots -->
+<div id="progress-dots"></div>
 <div id="pres">
 
 <!-- ══ SLIDE 1: TITLE ══ -->
@@ -853,14 +947,32 @@ const observer = new IntersectionObserver(entries => {
 }, { root: document.getElementById('pres'), threshold: 0.2 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-/* ── SLIDE COUNTER ── */
+/* ── SLIDE COUNTER + PROGRESS DOTS ── */
 const slides = document.querySelectorAll('.slide');
 const slideCounter = document.getElementById('slide-ctr');
 const pres = document.getElementById('pres');
-pres.addEventListener('scroll', () => {
-  const i = Math.round(pres.scrollTop / (window.innerHeight - 56));
-  slideCounter.textContent = `${i + 1} / ${slides.length}`;
-}, { passive: true });
+const dotsContainer = document.getElementById('progress-dots');
+
+// Build progress dots
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'pdot' + (i === 0 ? ' active' : '');
+  dot.title = `Slide ${i + 1}`;
+  dot.addEventListener('click', () => {
+    pres.scrollTo({ top: i * (window.innerHeight - 56), behavior: 'smooth' });
+  });
+  dotsContainer.appendChild(dot);
+});
+
+function updateSlideUI() {
+  const slideH = window.innerHeight - 56;
+  const i = Math.min(slides.length - 1, Math.round(pres.scrollTop / slideH));
+  if (slideCounter) slideCounter.textContent = `${i + 1} / ${slides.length}`;
+  document.querySelectorAll('.pdot').forEach((d, idx) => d.classList.toggle('active', idx === i));
+}
+
+pres.addEventListener('scroll', updateSlideUI, { passive: true });
+updateSlideUI();
 
 /* ── KEYBOARD NAV ── */
 window.addEventListener('keydown', e => {
@@ -868,6 +980,22 @@ window.addEventListener('keydown', e => {
   if (e.key === 'ArrowDown' || e.key === 'ArrowRight') pres.scrollBy({ top: h, behavior: 'smooth' });
   if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') pres.scrollBy({ top: -h, behavior: 'smooth' });
 });
+
+/* ── TOUCH SWIPE NAV ── */
+let touchStartY = 0, touchStartTime = 0;
+pres.addEventListener('touchstart', e => {
+  touchStartY = e.touches[0].clientY;
+  touchStartTime = Date.now();
+}, { passive: true });
+pres.addEventListener('touchend', e => {
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  const dt = Date.now() - touchStartTime;
+  // Only treat as swipe if fast enough and significant distance, not a scroll within a card
+  if (Math.abs(dy) > 60 && dt < 400) {
+    const h = window.innerHeight - 56;
+    pres.scrollBy({ top: dy > 0 ? h : -h, behavior: 'smooth' });
+  }
+}, { passive: true });
 
 /* ══════════════════════════════════════════
    DFS SIMULATION

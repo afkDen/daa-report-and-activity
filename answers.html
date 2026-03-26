@@ -149,6 +149,69 @@ code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-4
 .depth-val{font-family:var(--mono);font-size:.7rem;color:var(--muted);width:5rem;flex-shrink:0}
 
 .section-divider{border:none;border-top:1px dashed var(--border2);margin:.5rem 0}
+
+/* ══ MOBILE ══ */
+@media (max-width:768px) {
+  /* Nav */
+  .nav-inner{padding:0 1rem}
+  .nav-brand span{display:none}
+  .nav-link{padding:.4rem .55rem;font-size:.8rem}
+  .nav-link span{display:none}
+
+  /* Lock screen */
+  .lock-card{padding:1.75rem 1.25rem}
+  .lock-icon{width:3.25rem;height:3.25rem;margin-bottom:1.1rem}
+  .lock-title{font-size:1.2rem}
+  .lock-sub{font-size:.82rem;margin-bottom:1.25rem}
+
+  /* Page */
+  #content{padding-top:calc(var(--nav-h)+1.5rem);padding-left:.75rem;padding-right:.75rem;padding-bottom:3rem}
+  .page-title{font-size:1.6rem}
+  .page-desc{font-size:.88rem}
+
+  /* Answer cards */
+  .ans-header{padding:.9rem 1rem;flex-direction:column;align-items:flex-start;gap:.5rem}
+  .ans-body{padding:1rem;gap:1rem}
+  .ans-reveal{padding:.85rem 1rem}
+  .ans-label{min-width:7rem;font-size:.78rem}
+  .ans-value{font-size:.82rem}
+  .expl-box{font-size:.77rem}
+
+  /* Collapse all g2 grids to 1 col */
+  .g2{grid-template-columns:1fr}
+
+  /* Sim sections */
+  .sim-inner{padding:.75rem}
+  .sim-log{font-size:.77rem;min-height:2rem}
+  .ctrl-row{gap:.4rem}
+  .btn{padding:.45rem .85rem;font-size:.77rem}
+  .btn.btn-sm{padding:.3rem .6rem;font-size:.72rem}
+
+  /* Depth bars */
+  .depth-lbl{width:4.5rem;font-size:.64rem}
+  .depth-val{width:4rem;font-size:.64rem}
+  .depth-fill{font-size:.6rem}
+
+  /* Seq display wraps on mobile */
+  .seq-display{gap:.3rem}
+  .seq-node{font-size:.75rem;padding:.2rem .45rem}
+
+  /* Proof box */
+  .proof-box{font-size:.78rem}
+
+  /* Ans line stack on very small */
+  .ans-line{flex-direction:column;gap:.2rem}
+  .ans-label{min-width:unset}
+
+  code{font-size:.78em}
+}
+
+@media (max-width:480px) {
+  .ans-body{padding:.75rem}
+  .depth-track{height:1.35rem}
+  .depth-fill{font-size:.56rem}
+  .depth-lbl,.depth-val{display:none}
+}
 </style>
 </head>
 <body>
