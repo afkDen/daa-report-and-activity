@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decrease &amp; Conquer: Topological Sorting — DAA Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --slate-50:#f8fafc;--slate-300:#cbd5e1;--slate-400:#94a3b8;--slate-500:#64748b;
+  --slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--slate-900:#0f172a;--slate-950:#020617;
+  --indigo-400:#818cf8;--indigo-500:#6366f1;--indigo-600:#4f46e5;
+  --sky-400:#38bdf8;--sky-500:#0ea5e9;--rose-500:#f43f5e;--emerald-400:#34d399;--emerald-500:#10b981;--amber-400:#fbbf24;--amber-500:#f59e0b;
+  --bg:#020617;--card:#0f172a;--border:#1e293b;
+  --text:#f8fafc;--muted:#94a3b8;
+  --sans:'Inter',system-ui,sans-serif;--mono:'Fira Code',monospace;
+  --nav-h:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased;line-height:1.6}
+
+/* ── NAV ── */
+.site-nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:200;background:rgba(2,6,23,0.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 2rem}
+.nav-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--text);font-weight:600;font-size:.95rem}
+.nav-brand i{color:var(--indigo-500)}
+.nav-links{display:flex;align-items:center;gap:.5rem}
+.nav-link{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--muted);font-size:.85rem;font-weight:500;padding:.4rem .8rem;border-radius:.5rem;transition:all .2s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:var(--border)}
+.nav-link.active{color:var(--indigo-400)}
+.nav-badge{font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px;background:rgba(99,102,241,.12);color:var(--indigo-400);border:1px solid rgba(99,102,241,.25);margin-left:.5rem}
+.slide-counter{font-size:.75rem;color:var(--muted);font-family:var(--mono);padding:.3rem .7rem;border-radius:.375rem;background:var(--border)}
+
+/* ── LAYOUT ── */
+.bg-pattern{position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(to right,var(--slate-900) 1px,transparent 1px),linear-gradient(to bottom,var(--slate-900) 1px,transparent 1px);
+  background-size:4rem 4rem;-webkit-mask-image:radial-gradient(ellipse at center,black 0%,transparent 75%);mask-image:radial-gradient(ellipse at center,black 0%,transparent 75%);
+  opacity:.35;pointer-events:none}
+#pres{height:100vh;width:100vw;overflow-y:auto;scroll-snap-type:y mandatory;scroll-behavior:smooth;position:relative;z-index:1;padding-top:var(--nav-h)}
+.slide{scroll-snap-align:start;height:calc(100vh - var(--nav-h));width:100vw;display:flex;justify-content:center;align-items:center;padding:2.5rem 5rem;position:relative}
+.cw{max-width:1200px;width:100%;display:flex;flex-direction:column;gap:1.75rem}
+
+/* ── TYPOGRAPHY ── */
+h1,h2,h3,h4{font-weight:700;letter-spacing:-.025em;line-height:1.2;color:var(--text)}
+h1{font-size:clamp(2.5rem,4.5vw,4rem);letter-spacing:-.05em}
+h2{font-size:clamp(1.75rem,2.8vw,2.5rem)}
+h3{font-size:1.15rem}
+h4{font-size:1rem;font-weight:600}
+p,li{font-size:1rem;color:var(--muted)}
+strong{color:var(--text);font-weight:600}
+.ti{color:var(--indigo-500)}.ts{color:var(--sky-400)}.ta{color:var(--amber-500)}.te{color:var(--emerald-500)}.tr{color:var(--rose-500)}
+
+.badge{display:inline-flex;align-items:center;border-radius:9999px;background:rgba(99,102,241,.1);padding:.25rem .75rem;font-size:.8rem;font-weight:500;color:var(--indigo-400);border:1px solid rgba(99,102,241,.2);margin-bottom:.75rem}
+.badge.sky{background:rgba(14,165,233,.1);color:var(--sky-400);border-color:rgba(14,165,233,.2)}
+.badge.rose{background:rgba(244,63,94,.1);color:var(--rose-500);border-color:rgba(244,63,94,.2)}
+.badge.amber{background:rgba(245,158,11,.1);color:var(--amber-500);border-color:rgba(245,158,11,.2)}
+
+/* ── CARDS ── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.75rem;transition:border-color .2s,box-shadow .2s}
+.card:hover{border-color:var(--slate-700);box-shadow:0 20px 25px -5px rgba(0,0,0,.3)}
+.ficon{display:inline-flex;align-items:center;justify-content:center;border-radius:.75rem;background:rgba(99,102,241,.1);padding:.65rem;color:var(--indigo-500);margin-bottom:1.25rem;border:1px solid rgba(99,102,241,.2)}
+.ficon i{font-size:1.4rem}
+.ficon.sky{background:rgba(14,165,233,.1);color:var(--sky-400);border-color:rgba(14,165,233,.2)}
+.ficon.rose{background:rgba(244,63,94,.1);color:var(--rose-500);border-color:rgba(244,63,94,.2)}
+.ficon.amber{background:rgba(245,158,11,.1);color:var(--amber-500);border-color:rgba(245,158,11,.2)}
+.ficon.emerald{background:rgba(16,185,129,.1);color:var(--emerald-500);border-color:rgba(16,185,129,.2)}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:center}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem}
+
+.step-list{display:flex;flex-direction:column;gap:1.25rem}
+.step-item{display:flex;gap:1rem;align-items:flex-start}
+.step-num{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:2.25rem;height:2.25rem;border-radius:9999px;background:var(--indigo-600);color:#fff;font-weight:700;font-size:.875rem;box-shadow:0 0 0 4px var(--card),0 0 0 5px var(--slate-700)}
+
+.code-block{background:#0d1117;border:1px solid var(--border);border-radius:.75rem;padding:1.5rem;font-family:var(--mono);font-size:.9rem;color:var(--slate-300);overflow-x:auto;line-height:1.8}
+.ck{color:var(--rose-500)}.cf{color:var(--sky-400)}.cc{color:var(--slate-500);font-style:italic}.cv{color:var(--amber-400)}.cp{color:var(--emerald-400)}
+
+/* ── ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(18px);transition:all .75s cubic-bezier(.16,1,.3,1)}
+.reveal.active{opacity:1;transform:translateY(0)}
+.d1{transition-delay:80ms}.d2{transition-delay:160ms}.d3{transition-delay:240ms}.d4{transition-delay:320ms}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes pulse-glow{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes dash-flow{to{stroke-dashoffset:-20}}
+@keyframes fade-up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── DFS SIMULATION ── */
+.sim-layout{display:grid;grid-template-columns:1.5fr 1fr;gap:1.5rem;height:490px}
+.sim-graph{position:relative;background:var(--card);border:1px solid var(--border);border-radius:1rem;overflow:hidden;background-image:radial-gradient(var(--slate-800) 1px,transparent 1px);background-size:24px 24px}
+.sim-graph svg{width:100%;height:100%}
+
+.snode circle{fill:var(--slate-800);stroke:var(--slate-600);stroke-width:2;transition:fill .35s,stroke .35s,filter .35s}
+.snode text{fill:var(--muted);font-family:var(--sans);font-size:15px;font-weight:700;text-anchor:middle;dominant-baseline:central;pointer-events:none;transition:fill .35s}
+.snode[data-s="v"] circle{fill:rgba(245,158,11,.15);stroke:var(--amber-500);stroke-width:2.5;filter:drop-shadow(0 0 8px rgba(245,158,11,.45))}
+.snode[data-s="v"] text{fill:var(--amber-400)}
+.snode[data-s="d"] circle{fill:var(--indigo-600);stroke:var(--indigo-400);stroke-width:2}
+.snode[data-s="d"] text{fill:#fff}
+.snode[data-s="r"] circle{fill:rgba(244,63,94,.15);stroke:var(--rose-500);stroke-width:2.5;filter:drop-shadow(0 0 8px rgba(244,63,94,.4))}
+.snode[data-s="r"] text{fill:var(--rose-500)}
+
+.sedge{stroke:var(--slate-700);stroke-width:2;transition:stroke .35s,stroke-width .35s;fill:none}
+.sedge[data-s="a"]{stroke:var(--amber-500);stroke-width:2.5;stroke-dasharray:6 3;animation:dash-flow .8s linear infinite}
+.sedge[data-s="d"]{stroke:var(--emerald-500);stroke-width:2}
+.sedge[data-s="skip"]{stroke:var(--slate-600);stroke-width:1.5;stroke-dasharray:3 3}
+
+.sim-right{display:flex;flex-direction:column;gap:.75rem}
+.sim-panel{background:var(--card);border:1px solid var(--border);border-radius:.75rem;padding:1rem;display:flex;flex-direction:column}
+.sim-panel-title{font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:.6rem}
+.call-stack{display:flex;flex-direction:column;gap:.35rem;flex:1;overflow:hidden;min-height:80px}
+.call-frame{background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);color:var(--indigo-400);font-family:var(--mono);font-size:.78rem;font-weight:500;padding:.3rem .65rem;border-radius:.4rem;animation:fade-up .2s ease-out;border-left:3px solid var(--indigo-500)}
+.call-frame.top{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.25);color:var(--amber-400);border-left-color:var(--amber-500)}
+.sim-log{background:#0d1117;border:1px solid var(--border);border-radius:.5rem;padding:.75rem 1rem;font-size:.82rem;color:var(--slate-300);min-height:3.5rem;flex-shrink:0;line-height:1.5}
+.out-stack{display:flex;flex-direction:row;flex-wrap:wrap;gap:.4rem;min-height:2.5rem;align-items:flex-start}
+.out-item{background:var(--indigo-600);color:#fff;font-family:var(--mono);font-weight:700;font-size:.85rem;padding:.3rem .55rem;border-radius:.4rem;animation:fade-up .25s ease-out;min-width:1.8rem;text-align:center}
+.sim-controls{display:flex;gap:.5rem;flex-shrink:0}
+.btn{background:var(--indigo-600);color:#fff;border:none;padding:.6rem 1.25rem;border-radius:.5rem;font-size:.82rem;font-weight:600;font-family:var(--sans);cursor:pointer;transition:background .2s;display:flex;align-items:center;gap:.4rem;flex:1}
+.btn:hover{background:var(--indigo-500)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;border:1px solid var(--slate-600);color:var(--muted);flex:0}
+.btn-ghost:hover{background:var(--border);color:var(--text)}
+.speed-wrap{display:flex;align-items:center;gap:.5rem;font-size:.75rem;color:var(--muted)}
+input[type=range]{width:70px;accent-color:var(--indigo-500)}
+.step-ctr{font-family:var(--mono);font-size:.75rem;color:var(--muted);text-align:center;margin-top:.25rem}
+
+/* ── CYCLE ANIMATION ── */
+.cycle-canvas{position:relative;width:100%;height:260px;overflow:hidden}
+.cycle-canvas svg{width:100%;height:100%}
+.cn circle{fill:var(--slate-800);stroke:var(--slate-600);stroke-width:2;transition:fill .4s,stroke .4s,filter .4s}
+.cn text{fill:var(--muted);font-size:14px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.cn.visiting circle{fill:rgba(245,158,11,.15);stroke:var(--amber-500);stroke-width:2.5;filter:drop-shadow(0 0 7px rgba(245,158,11,.5))}
+.cn.visiting text{fill:var(--amber-400)}
+.cn.cycle circle{fill:rgba(244,63,94,.15);stroke:var(--rose-500);stroke-width:2.5;filter:drop-shadow(0 0 9px rgba(244,63,94,.6))}
+.cn.cycle text{fill:var(--rose-500)}
+.ce{stroke:var(--slate-600);stroke-width:1.5;fill:none;transition:stroke .4s}
+.ce.active{stroke:var(--amber-500);stroke-width:2;stroke-dasharray:5 3;animation:dash-flow .7s linear infinite}
+.ce.back{stroke:var(--rose-500);stroke-width:2.5;stroke-dasharray:5 3;animation:dash-flow .6s linear infinite}
+.ce.done{stroke:var(--emerald-500)}
+.rec-display{display:flex;gap:.4rem;flex-wrap:wrap;min-height:2rem;align-items:center}
+.rec-item{font-family:var(--mono);font-size:.78rem;font-weight:600;padding:.25rem .5rem;border-radius:.35rem;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.25);color:var(--indigo-400);animation:fade-up .2s ease-out}
+.rec-item.cycle-item{background:rgba(244,63,94,.12);border-color:rgba(244,63,94,.3);color:var(--rose-500)}
+.cycle-error{background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.3);border-radius:.75rem;padding:.75rem 1rem;font-size:.85rem;color:var(--rose-500);font-weight:500;display:none;align-items:center;gap:.5rem}
+.cycle-error.show{display:flex}
+
+/* ── COMPLEXITY TABLE ── */
+.comp-table{width:100%;border-collapse:collapse;font-size:.9rem}
+.comp-table th{text-align:left;padding:.75rem 1rem;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600}
+.comp-table td{padding:.85rem 1rem;border-bottom:1px solid rgba(30,41,59,.5);color:var(--muted)}
+.comp-table td:first-child{color:var(--text);font-weight:600}
+.comp-table td code{font-family:var(--mono);font-size:.85rem;color:var(--indigo-400);background:rgba(99,102,241,.1);padding:.1rem .4rem;border-radius:.25rem}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table tr:hover td{background:rgba(30,41,59,.4)}
+
+/* ── COMPARE COLS ── */
+.cmp{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:1.75rem;height:100%}
+.cmp ul{list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.75rem}
+.cmp li{display:flex;gap:.6rem;font-size:.9rem;color:var(--muted)}
+.cmp li::before{content:'\f00c';font-family:'Font Awesome 6 Free';font-weight:900;color:var(--emerald-500);font-size:.8rem;margin-top:.2rem;flex-shrink:0}
+.why-box{background:rgba(99,102,241,.07);border:1px solid rgba(99,102,241,.2);border-radius:.75rem;padding:1rem 1.25rem;margin-top:1rem}
+.why-box p{font-size:.85rem;color:var(--muted)}
+
+/* ── KAHN VIZ ── */
+.kahn-viz{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.75rem 0}
+.kahn-node{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.kn-circle{width:2.2rem;height:2.2rem;border-radius:50%;background:var(--slate-800);border:2px solid var(--slate-600);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;color:var(--muted);transition:all .3s}
+.kn-indeg{font-size:.65rem;font-family:var(--mono);color:var(--sky-400);background:rgba(14,165,233,.1);padding:.1rem .3rem;border-radius:.2rem;border:1px solid rgba(14,165,233,.2)}
+.kahn-arr{color:var(--slate-700);font-size:1rem}
+.kn-zero{border-color:var(--sky-400);background:rgba(14,165,233,.1)}
+.kn-zero .kn-circle{color:var(--sky-400)}
+.kn-done{border-color:var(--emerald-500);background:rgba(16,185,129,.1)}
+.kn-done .kn-circle{color:var(--emerald-400)}
+
+/* ── DISCONNECTED FOREST VIZ ── */
+.forest-viz{position:relative;width:100%;height:200px}
+.forest-viz svg{width:100%;height:100%}
+.fnode circle{fill:var(--slate-800);stroke:var(--slate-600);stroke-width:1.5;transition:fill .3s,stroke .3s}
+.fnode text{fill:var(--muted);font-size:13px;font-weight:600;text-anchor:middle;dominant-baseline:central}
+.fnode.isolated circle{stroke:var(--slate-600);stroke-dasharray:4 2}
+.fedge{stroke:var(--slate-700);stroke-width:1.5;fill:none;marker-end:url(#arr-f)}
+
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><i class="fa-solid fa-diagram-project"></i> Topological Sort</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link active"><i class="fa-solid fa-book-open"></i> Report</a>
+      <a href="activities.html" class="nav-link"><i class="fa-solid fa-pen-to-square"></i> Activities</a>
+      <span class="nav-badge">DAA</span>
+      <span class="slide-counter" id="slide-ctr">1 / 15</span>
+    </div>
+  </div>
+</nav>
+
+<!-- PRESENTATION -->
+<div id="pres">
+
+<!-- ══ SLIDE 1: TITLE ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="reveal">
+    <span class="badge">Design &amp; Analysis of Algorithms</span>
+    <h1>Decrease &amp; Conquer:<br><span class="ti">Topological Sorting</span></h1>
+    <p style="margin-top:1.25rem;max-width:580px;font-size:1.05rem">A comprehensive exploration of dependency resolution using Depth-First Search, post-order traversal, and the Decrease &amp; Conquer paradigm.</p>
+    <div style="display:flex;gap:.75rem;margin-top:2rem;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--muted);background:var(--border);padding:.35rem .75rem;border-radius:.5rem"><i class="fa-solid fa-layer-group" style="color:var(--indigo-400)"></i> 15 slides</span>
+      <span style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--muted);background:var(--border);padding:.35rem .75rem;border-radius:.5rem"><i class="fa-solid fa-computer" style="color:var(--sky-400)"></i> Interactive Simulation</span>
+      <span style="display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--muted);background:var(--border);padding:.35rem .75rem;border-radius:.5rem"><i class="fa-solid fa-arrows-up-down" style="color:var(--emerald-400)"></i> Scroll to Navigate</span>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 2: DAG ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="reveal"><span class="badge">The Prerequisite</span><h2>Directed Acyclic <span class="ti">Graph</span></h2><p style="margin-bottom:1.5rem">Topological Sort is only mathematically defined for <strong>DAGs</strong> — graphs with three non-negotiable properties.</p></div>
+  <div class="g3">
+    <div class="card reveal d1">
+      <div class="ficon"><i class="fa-solid fa-arrow-right-long"></i></div>
+      <h3>Directed</h3>
+      <p style="font-size:.88rem;margin-top:.4rem">Edges are one-way streets establishing strict prerequisite relationships: Task A must precede Task B.</p>
+    </div>
+    <div class="card reveal d2">
+      <div class="ficon rose"><i class="fa-solid fa-ban"></i></div>
+      <h3>Acyclic</h3>
+      <p style="font-size:.88rem;margin-top:.4rem">Zero cycles exist. Following directed edges will never return you to your starting vertex — no circular dependencies.</p>
+    </div>
+    <div class="card reveal d3">
+      <div class="ficon sky"><i class="fa-solid fa-circle-nodes"></i></div>
+      <h3>Graph</h3>
+      <p style="font-size:.88rem;margin-top:.4rem">A structure of <strong>Vertices</strong> (tasks/nodes) connected by <strong>Edges</strong> (dependency relationships between them).</p>
+    </div>
+  </div>
+  <div class="reveal d3" style="background:rgba(99,102,241,.05);border:1px solid rgba(99,102,241,.15);border-radius:.75rem;padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:.75rem">
+    <i class="fa-solid fa-lightbulb" style="color:var(--indigo-400);margin-top:.15rem;flex-shrink:0"></i>
+    <p style="font-size:.88rem"><strong>Key invariant:</strong> Remove all cycles and you get a DAG. A valid topological ordering exists if and only if the graph is a DAG — cycle presence makes ordering impossible.</p>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 3: WHAT IS TOPO SORT ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="g2">
+    <div class="reveal">
+      <span class="badge">Definition</span>
+      <h2>What is <span class="ti">Topological Sort?</span></h2>
+      <p style="margin:.75rem 0 1.5rem">A <strong>linear ordering</strong> of all vertices in a DAG such that for every directed edge <em>u → v</em>, vertex <em>u</em> appears before <em>v</em> in the ordering.</p>
+      <div class="card" style="padding:1.25rem">
+        <div style="display:flex;gap:.75rem;align-items:flex-start">
+          <div class="ficon sky" style="margin:0;flex-shrink:0"><i class="fa-solid fa-lightbulb"></i></div>
+          <div><h4>The Master Schedule</h4><p style="font-size:.85rem;margin-top:.3rem">If Task B depends on Task A, the algorithm mathematically guarantees A appears before B in the output — for every single dependency in the graph simultaneously.</p></div>
+        </div>
+      </div>
+      <div class="card" style="padding:1.25rem;margin-top:.75rem;border-color:rgba(245,158,11,.3)">
+        <div style="display:flex;gap:.75rem;align-items:flex-start">
+          <div class="ficon amber" style="margin:0;flex-shrink:0"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div><h4>Not Necessarily Unique</h4><p style="font-size:.85rem;margin-top:.3rem">Multiple valid topological orderings can exist for the same DAG when vertices have no ordering constraint between them (parallel paths).</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="card reveal d2" style="height:360px;display:flex;align-items:center;justify-content:center">
+      <svg viewBox="0 0 280 280" style="max-width:250px;width:100%">
+        <defs><marker id="arr-d" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker></defs>
+        <!-- Simple 4-node DAG visual -->
+        <line x1="140" y1="40" x2="70" y2="130" stroke="#334155" stroke-width="2" marker-end="url(#arr-d)"/>
+        <line x1="140" y1="40" x2="210" y2="130" stroke="#334155" stroke-width="2" marker-end="url(#arr-d)"/>
+        <line x1="70" y1="170" x2="140" y2="240" stroke="#334155" stroke-width="2" marker-end="url(#arr-d)"/>
+        <line x1="210" y1="170" x2="140" y2="240" stroke="#334155" stroke-width="2" marker-end="url(#arr-d)"/>
+        <circle cx="140" cy="40" r="26" fill="#4f46e5" stroke="#6366f1" stroke-width="2"/>
+        <text x="140" y="40" fill="white" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">A</text>
+        <circle cx="70" cy="150" r="26" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <text x="70" y="150" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">B</text>
+        <circle cx="210" cy="150" r="26" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <text x="210" y="150" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">C</text>
+        <circle cx="140" cy="245" r="26" fill="#1e293b" stroke="#475569" stroke-width="2"/>
+        <text x="140" y="245" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">D</text>
+        <text x="140" y="278" fill="#475569" font-size="11" text-anchor="middle" font-family="'Fira Code',monospace">A → B → D  or  A → C → D</text>
+      </svg>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 4: REAL-WORLD APPS ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="reveal"><span class="badge sky">Real-World Impact</span><h2>Where is it <span class="ti">Applied?</span></h2><p>Topological sorting is the invisible backbone of tools developers use every day.</p></div>
+  <div class="g3" style="margin-top:.5rem">
+    <div class="card reveal d1"><div class="ficon sky"><i class="fa-solid fa-graduation-cap"></i></div><h3>Curriculum Planning</h3><p style="font-size:.85rem;margin-top:.4rem">University registrars validate that prerequisite chains are satisfied — "Intro to CS" before "Data Structures", always.</p></div>
+    <div class="card reveal d2"><div class="ficon"><i class="fa-solid fa-cubes"></i></div><h3>Package Managers</h3><p style="font-size:.85rem;margin-top:.4rem">npm, pip, and apt resolve massive dependency trees to determine the exact install order. A single topo sort on millions of packages.</p></div>
+    <div class="card reveal d3"><div class="ficon sky"><i class="fa-solid fa-wrench"></i></div><h3>Build Systems</h3><p style="font-size:.85rem;margin-top:.4rem">Make and Webpack calculate which source files to compile first by analyzing internal import and include dependencies.</p></div>
+    <div class="card reveal d1"><div class="ficon emerald"><i class="fa-solid fa-microchip"></i></div><h3>Circuit Design</h3><p style="font-size:.85rem;margin-top:.4rem">Logic gate evaluation order in digital circuits — gates with no input dependencies are computed first, propagating forward.</p></div>
+    <div class="card reveal d2"><div class="ficon amber"><i class="fa-solid fa-calendar-days"></i></div><h3>Task Scheduling</h3><p style="font-size:.85rem;margin-top:.4rem">Project management tools (PERT/CPM) sequence tasks to respect deadlines and resource dependencies in production pipelines.</p></div>
+    <div class="card reveal d3"><div class="ficon rose"><i class="fa-solid fa-database"></i></div><h3>Database Migrations</h3><p style="font-size:.85rem;margin-top:.4rem">Schema migration order — a foreign key constraint requires the referenced table to exist first, forming a strict ordering.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 5: TWO APPROACHES ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="reveal"><span class="badge">Algorithmic Approaches</span><h2>How Do We <span class="ti">Solve It?</span></h2></div>
+  <div class="g2" style="margin-top:.25rem;align-items:start">
+    <div class="cmp reveal d1">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+        <h3>Kahn's Algorithm</h3>
+        <span style="font-size:.72rem;background:rgba(14,165,233,.1);color:var(--sky-400);padding:.2rem .55rem;border-radius:.25rem;font-weight:600;border:1px solid rgba(14,165,233,.2)">BFS-Based</span>
+      </div>
+      <p style="font-size:.85rem">Works iteratively from the "front" — nodes with zero prerequisites.</p>
+      <ul>
+        <li>Compute in-degree for all vertices</li>
+        <li>Enqueue all nodes with in-degree = 0</li>
+        <li>Dequeue → add to result → decrement neighbors' in-degrees</li>
+        <li>Repeat until queue is empty</li>
+      </ul>
+      <div class="why-box" style="background:rgba(14,165,233,.05);border-color:rgba(14,165,233,.2)">
+        <p><strong style="color:var(--sky-400)">Strengths:</strong> Intuitive, cycle detection built-in (graph not fully processed if cycle exists), produces result directly in order.</p>
+      </div>
+    </div>
+    <div class="cmp reveal d2" style="border-color:rgba(99,102,241,.35);position:relative;overflow:hidden">
+      <div style="position:absolute;top:0;left:0;width:4px;height:100%;background:var(--indigo-500)"></div>
+      <div style="padding-left:.5rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <h3 class="ti">DFS Post-Order</h3>
+          <span style="font-size:.72rem;background:rgba(99,102,241,.1);color:var(--indigo-400);padding:.2rem .55rem;border-radius:.25rem;font-weight:600;border:1px solid rgba(99,102,241,.2)">Recursive</span>
+        </div>
+        <p style="font-size:.85rem">Dives deep to the "end" of each path before working backwards.</p>
+        <ul>
+          <li>Recursively explore all unvisited neighbors</li>
+          <li>Push a node to stack <strong>only after</strong> all descendants finish</li>
+          <li>Handle disconnected graphs with an outer for-loop</li>
+          <li>Reverse the stack for the final order</li>
+        </ul>
+        <div class="why-box">
+          <p><strong style="color:var(--indigo-400)">Why DFS for this report:</strong> DFS naturally models the Decrease &amp; Conquer paradigm — each recursive call <em>decreases</em> the problem scope. The post-order push is an elegant, almost implicit consequence of the recursion itself, making it the ideal choice for a Decrease &amp; Conquer analysis.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 6: KAHN'S ALGORITHM ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="g2">
+    <div class="reveal">
+      <span class="badge sky">Brief Overview</span>
+      <h2>Kahn's <span class="ts">Algorithm</span></h2>
+      <p style="margin:.75rem 0">Proposed by Arthur B. Kahn in 1962. It solves topological sorting using a <strong>BFS queue and in-degree counting</strong> — the opposite direction from DFS.</p>
+      <div class="step-list" style="margin-top:1rem">
+        <div class="step-item"><div class="step-num" style="background:var(--sky-500)">1</div><div><h4>Calculate In-Degrees</h4><p style="font-size:.85rem;margin-top:.2rem">Count incoming edges for each node. Nodes with 0 in-degree have no prerequisites.</p></div></div>
+        <div class="step-item"><div class="step-num" style="background:var(--sky-500)">2</div><div><h4>Initialize Queue</h4><p style="font-size:.85rem;margin-top:.2rem">Enqueue all nodes with in-degree = 0. These are your "ready" tasks.</p></div></div>
+        <div class="step-item"><div class="step-num" style="background:var(--sky-500)">3</div><div><h4>Process &amp; Propagate</h4><p style="font-size:.85rem;margin-top:.2rem">Dequeue → append to result → decrement each neighbor's in-degree → enqueue newly zero-degree neighbors.</p></div></div>
+      </div>
+    </div>
+    <div class="reveal d2">
+      <div class="card" style="margin-bottom:1rem">
+        <p style="font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.75rem;font-weight:600">Live Visualization — Graph: A→C, B→C, C→D</p>
+        <div class="kahn-viz">
+          <div class="kahn-node kn-zero"><div class="kn-circle">A</div><div class="kn-indeg">in:0</div></div>
+          <i class="fa-solid fa-arrow-right kahn-arr"></i>
+          <div class="kahn-node kn-zero"><div class="kn-circle">B</div><div class="kn-indeg">in:0</div></div>
+          <i class="fa-solid fa-arrow-right kahn-arr"></i>
+          <div class="kahn-node"><div class="kn-circle">C</div><div class="kn-indeg">in:2</div></div>
+          <i class="fa-solid fa-arrow-right kahn-arr"></i>
+          <div class="kahn-node"><div class="kn-circle">D</div><div class="kn-indeg">in:1</div></div>
+        </div>
+        <div style="margin-top:.75rem;font-size:.8rem;color:var(--muted)"><span style="color:var(--sky-400);font-weight:600">Queue:</span> [A, B] → process A → [B] → process B (C now in:0) → [C] → process C → [D] → ...</div>
+        <div style="margin-top:.5rem;font-size:.8rem"><span style="color:var(--emerald-400);font-weight:600">Result:</span> A → B → C → D</div>
+      </div>
+      <div class="card" style="border-color:rgba(245,158,11,.3)">
+        <h4 style="color:var(--amber-400);margin-bottom:.5rem"><i class="fa-solid fa-scale-balanced" style="margin-right:.35rem"></i>DFS vs. Kahn's</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;font-size:.8rem">
+          <div><p style="color:var(--muted);margin-bottom:.25rem">DFS Approach</p><p>Implicit via recursion<br>Stack (LIFO, reversed)<br>Requires rec-stack for cycles</p></div>
+          <div><p style="color:var(--muted);margin-bottom:.25rem">Kahn's Approach</p><p>Explicit iteration<br>Queue (FIFO, direct)<br>Cycle: count check at end</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 7: DECREASE & CONQUER ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="g2">
+    <div class="reveal">
+      <span class="badge">The Paradigm</span>
+      <h2>Decrease <span class="ti">&amp; Conquer</span></h2>
+      <p style="margin:.75rem 0">DFS-based topological sort is a textbook example of the <strong>Decrease by a Variable Amount</strong> strategy. Each recursive call reduces the problem to a strictly smaller subgraph.</p>
+      <div class="card" style="padding:1.25rem;margin-top:1rem;border-color:rgba(99,102,241,.3);background:rgba(99,102,241,.05)">
+        <p style="font-size:.85rem"><strong style="color:var(--indigo-400)">The key insight:</strong> To produce the topological position of node <em>u</em>, we must first determine the positions of all its descendants. DFS achieves this automatically through the call stack — when a recursive call returns, we <em>know</em> all descendants are settled.</p>
+      </div>
+    </div>
+    <div class="step-list reveal d2">
+      <div class="step-item"><div class="step-num">1</div><div><h4>Reduce the Problem</h4><p style="font-size:.85rem;margin-top:.2rem">To sort vertex <em>u</em>, DFS delegates ordering to each unvisited neighbor — each call is a <em>strictly smaller</em> subproblem (one fewer unvisited node).</p></div></div>
+      <div class="step-item"><div class="step-num">2</div><div><h4>Conquer Base Cases</h4><p style="font-size:.85rem;margin-top:.2rem">Leaf nodes (no outgoing edges) are trivially solved — they have no dependencies, so they're pushed immediately. These are the smallest subproblems.</p></div></div>
+      <div class="step-item"><div class="step-num">3</div><div><h4>Combine Results</h4><p style="font-size:.85rem;margin-top:.2rem">Once all of <em>u</em>'s descendants return, <em>u</em> itself is pushed. The stack automatically accumulates the reverse-topological order.</p></div></div>
+      <div class="step-item"><div class="step-num">4</div><div><h4>Handle Disconnected Graphs</h4><p style="font-size:.85rem;margin-top:.2rem">The outer for-loop ensures every component is visited — even completely isolated subgraphs trigger their own DFS chain.</p></div></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 8: PSEUDOCODE ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="reveal"><span class="badge">Algorithm</span><h2>The <span class="ti">Pseudocode</span></h2><p style="margin-bottom:1rem">Nearly identical to standard DFS — the only critical difference is the <strong>post-order push</strong> that happens after all descendants are explored.</p></div>
+  <div class="g2" style="margin-top:.25rem;align-items:start">
+    <div class="code-block reveal d1">
+<pre><code><span class="ck">function</span> <span class="cf">topologicalSort</span>(graph):
+  visited  = <span class="ck">new</span> Set()
+  recStack = <span class="ck">new</span> Set()   <span class="cc">// for cycle detection</span>
+  stack    = []           <span class="cc">// output stack</span>
+
+  <span class="ck">for each</span> node <span class="ck">in</span> graph.vertices:
+    <span class="ck">if</span> node <span class="ck">not in</span> visited:
+      <span class="cf">dfs</span>(node, visited, recStack, stack)
+
+  <span class="ck">return</span> stack.<span class="cf">reverse</span>()
+
+<span class="ck">function</span> <span class="cf">dfs</span>(node, visited, recStack, stack):
+  visited.<span class="cf">add</span>(node)
+  recStack.<span class="cf">add</span>(node)
+
+  <span class="ck">for each</span> neighbor <span class="ck">in</span> graph.<span class="cf">adj</span>(node):
+    <span class="ck">if</span> neighbor <span class="ck">in</span> recStack:
+      <span class="ck">throw</span> <span class="cp">"CycleDetectedError"</span>
+    <span class="ck">if</span> neighbor <span class="ck">not in</span> visited:
+      <span class="cf">dfs</span>(neighbor, visited, recStack, stack)
+
+  recStack.<span class="cf">remove</span>(node)
+  <span class="cc">// ★ POST-ORDER: node is only pushed here,</span>
+  <span class="cc">//   after ALL descendants are fully explored</span>
+  stack.<span class="cf">push</span>(node)</code></pre>
+    </div>
+    <div class="reveal d2" style="display:flex;flex-direction:column;gap:1rem">
+      <div class="card" style="border-left:3px solid var(--amber-500)"><h4 style="color:var(--amber-400);margin-bottom:.4rem"><i class="fa-solid fa-star" style="margin-right:.35rem"></i>The Critical Line</h4><p style="font-size:.85rem"><code style="color:var(--amber-400);background:rgba(245,158,11,.1);padding:.15rem .4rem;border-radius:.3rem;font-family:var(--mono)">stack.push(node)</code> is at the end. If it were at the beginning (pre-order), we'd get the wrong order. This single placement change transforms standard DFS into topological sort.</p></div>
+      <div class="card" style="border-left:3px solid var(--emerald-500)"><h4 style="color:var(--emerald-400);margin-bottom:.4rem"><i class="fa-solid fa-clock" style="margin-right:.35rem"></i>Time Complexity</h4><p style="font-size:.85rem"><strong>O(V + E)</strong> — each vertex is visited once (O(V)) and each edge is examined once (O(E)). The visited set makes revisits O(1) per check.</p></div>
+      <div class="card" style="border-left:3px solid var(--sky-400)"><h4 style="color:var(--sky-400);margin-bottom:.4rem"><i class="fa-solid fa-memory" style="margin-right:.35rem"></i>Space Complexity</h4><p style="font-size:.85rem"><strong>O(V)</strong> — space for the visited set, recursion stack, and output stack are all bounded by the number of vertices.</p></div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 9: DISCONNECTED FORESTS ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="g2">
+    <div class="reveal">
+      <span class="badge amber">Edge Case</span>
+      <h2>Disconnected <span class="ti">Forests</span></h2>
+      <p style="margin:.75rem 0">Real dependency graphs are rarely connected. Why does the pseudocode have an outer <code style="font-family:var(--mono);color:var(--indigo-400)">for each node</code> loop?</p>
+      <div class="card" style="padding:1.25rem;margin-top:.5rem">
+        <h4 style="margin-bottom:.5rem"><i class="fa-solid fa-route" style="color:var(--indigo-400);margin-right:.35rem"></i>Single DFS is Insufficient</h4>
+        <p style="font-size:.85rem">A single DFS call from one starting node can only reach vertices <em>reachable</em> from that node. If the graph has isolated components — separate trees with no connecting edges — those nodes will never be visited.</p>
+      </div>
+      <div class="card" style="padding:1.25rem;margin-top:.75rem;border-color:rgba(16,185,129,.3)">
+        <h4 style="margin-bottom:.5rem"><i class="fa-solid fa-check-circle" style="color:var(--emerald-500);margin-right:.35rem"></i>The Solution</h4>
+        <p style="font-size:.85rem">The outer loop iterates over <strong>every vertex</strong> in the graph. If a vertex hasn't been visited yet, a new DFS chain is started from it. This guarantees 100% coverage regardless of connectivity.</p>
+      </div>
+    </div>
+    <div class="reveal d2">
+      <div class="card" style="height:320px;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:1rem">
+        <p style="font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:1rem;font-weight:600">Two Disconnected Components</p>
+        <svg viewBox="0 0 380 220" style="max-width:100%;width:100%">
+          <defs><marker id="arr-f" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker></defs>
+          <!-- Component 1 edges -->
+          <line x1="60" y1="110" x2="140" y2="60" stroke="#334155" stroke-width="1.5" marker-end="url(#arr-f)"/>
+          <line x1="60" y1="110" x2="140" y2="160" stroke="#334155" stroke-width="1.5" marker-end="url(#arr-f)"/>
+          <line x1="160" y1="60" x2="220" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#arr-f)"/>
+          <line x1="160" y1="160" x2="220" y2="110" stroke="#334155" stroke-width="1.5" marker-end="url(#arr-f)"/>
+          <!-- Component 2 edges (dashed border) -->
+          <line x1="290" y1="80" x2="350" y2="60" stroke="#334155" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#arr-f)"/>
+          <line x1="290" y1="80" x2="350" y2="110" stroke="#334155" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#arr-f)"/>
+          <!-- Component 1 nodes -->
+          <circle cx="60" cy="110" r="22" fill="#4f46e5" stroke="#6366f1" stroke-width="2"/><text x="60" y="110" fill="white" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">1</text>
+          <circle cx="150" cy="60" r="22" fill="#1e293b" stroke="#475569" stroke-width="2"/><text x="150" y="60" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">2</text>
+          <circle cx="150" cy="160" r="22" fill="#1e293b" stroke="#475569" stroke-width="2"/><text x="150" y="160" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">3</text>
+          <circle cx="225" cy="110" r="22" fill="#1e293b" stroke="#475569" stroke-width="2"/><text x="225" y="110" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">4</text>
+          <!-- Component 2 nodes (dashed) -->
+          <circle cx="290" cy="80" r="22" fill="#1e293b" stroke="#334155" stroke-width="2" stroke-dasharray="4 2"/><text x="290" y="80" fill="#64748b" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">5</text>
+          <circle cx="356" cy="60" r="22" fill="#1e293b" stroke="#334155" stroke-width="2" stroke-dasharray="4 2"/><text x="356" y="60" fill="#64748b" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">6</text>
+          <circle cx="356" cy="110" r="22" fill="#1e293b" stroke="#334155" stroke-width="2" stroke-dasharray="4 2"/><text x="356" y="110" fill="#64748b" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">7</text>
+          <!-- Labels -->
+          <text x="140" y="205" fill="#4f46e5" font-size="11" font-weight="600" text-anchor="middle">Component 1 — reachable from node 1</text>
+          <text x="323" y="145" fill="#475569" font-size="11" text-anchor="middle">Component 2</text>
+          <text x="323" y="158" fill="#475569" font-size="11" text-anchor="middle">outer loop catches it</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 10: DFS SIMULATION ══ -->
+<section class="slide" style="padding:1.5rem 3rem">
+<div class="cw" style="gap:1rem;max-width:1400px">
+  <div class="reveal" style="display:flex;align-items:baseline;gap:1rem;flex-wrap:wrap">
+    <h2>DFS <span class="ti">Simulation</span></h2>
+    <p style="font-size:.85rem">Graph: 1→2, 1→3, 2→4, 2→5, 3→5, 3→6</p>
+    <span style="font-size:.75rem;color:var(--muted);margin-left:auto;font-family:var(--mono)" id="step-ctr">Step 0 / 18</span>
+  </div>
+  <div class="sim-layout reveal d1">
+    <!-- Graph Canvas -->
+    <div class="sim-graph">
+      <svg id="sim-svg" viewBox="0 0 600 420" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="m-def" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#334155"/></marker>
+          <marker id="m-act" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#f59e0b"/></marker>
+          <marker id="m-done" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#10b981"/></marker>
+        </defs>
+        <!-- Edges -->
+        <line id="se-1-2" class="sedge" x1="300" y1="70" x2="150" y2="210" marker-end="url(#m-def)"/>
+        <line id="se-1-3" class="sedge" x1="300" y1="70" x2="450" y2="210" marker-end="url(#m-def)"/>
+        <line id="se-2-4" class="sedge" x1="150" y1="210" x2="65" y2="350" marker-end="url(#m-def)"/>
+        <line id="se-2-5" class="sedge" x1="150" y1="210" x2="300" y2="350" marker-end="url(#m-def)"/>
+        <line id="se-3-5" class="sedge" x1="450" y1="210" x2="300" y2="350" marker-end="url(#m-def)"/>
+        <line id="se-3-6" class="sedge" x1="450" y1="210" x2="535" y2="350" marker-end="url(#m-def)"/>
+        <!-- Nodes -->
+        <g class="snode" id="sn-1" data-s=""><circle cx="300" cy="70" r="28"/><text x="300" y="70">1</text></g>
+        <g class="snode" id="sn-2" data-s=""><circle cx="150" cy="210" r="28"/><text x="150" y="210">2</text></g>
+        <g class="snode" id="sn-3" data-s=""><circle cx="450" cy="210" r="28"/><text x="450" y="210">3</text></g>
+        <g class="snode" id="sn-4" data-s=""><circle cx="65" cy="350" r="28"/><text x="65" y="350">4</text></g>
+        <g class="snode" id="sn-5" data-s=""><circle cx="300" cy="350" r="28"/><text x="300" y="350">5</text></g>
+        <g class="snode" id="sn-6" data-s=""><circle cx="535" cy="350" r="28"/><text x="535" y="350">6</text></g>
+        <!-- Node labels (for context) -->
+        <text x="300" y="14" fill="#334155" font-size="11" text-anchor="middle" font-family="'Fira Code',monospace">Start</text>
+      </svg>
+    </div>
+    <!-- Controls Panel -->
+    <div class="sim-right">
+      <div class="sim-panel" style="flex:0.55">
+        <div class="sim-panel-title"><i class="fa-solid fa-layer-group" style="margin-right:.3rem;color:var(--indigo-400)"></i>Call Stack (DFS Frames)</div>
+        <div class="call-stack" id="sim-calls"></div>
+      </div>
+      <div class="sim-panel" style="flex:0;padding:.75rem 1rem">
+        <div class="sim-panel-title"><i class="fa-solid fa-terminal" style="margin-right:.3rem;color:var(--amber-400)"></i>Log</div>
+        <div class="sim-log" id="sim-log">Simulation ready. Click <strong>Next Step</strong> to begin DFS from Node 1.</div>
+      </div>
+      <div class="sim-panel" style="flex:0.4">
+        <div class="sim-panel-title"><i class="fa-solid fa-stack-overflow" style="margin-right:.3rem;color:var(--emerald-400)"></i>Output Stack <span style="font-size:.6rem;color:var(--slate-600)">(post-order pushes)</span></div>
+        <div class="out-stack" id="sim-out"></div>
+        <div id="sim-result" style="display:none;margin-top:.5rem;font-size:.78rem;font-family:var(--mono);color:var(--emerald-400);background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:.4rem;padding:.4rem .7rem">
+          ✓ Topo Order: 1 → 3 → 6 → 2 → 5 → 4
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:.35rem;flex-shrink:0">
+        <div class="sim-controls">
+          <button class="btn" id="btn-auto"><i class="fa-solid fa-play"></i> Auto</button>
+          <button class="btn" id="btn-next"><i class="fa-solid fa-forward-step"></i> Next</button>
+          <button class="btn btn-ghost" id="btn-reset" title="Reset"><i class="fa-solid fa-rotate-right"></i></button>
+        </div>
+        <div class="speed-wrap">
+          <i class="fa-solid fa-gauge-simple" style="font-size:.7rem"></i> Speed:
+          <input type="range" id="speed-slider" min="200" max="2000" step="200" value="900">
+          <span id="speed-label">1.0×</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 11: FINAL OUTPUT ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="g2">
+    <div class="reveal">
+      <span class="badge">Interpreting Results</span>
+      <h2>Reading the <span class="ti">Stack</span></h2>
+      <p style="margin:.75rem 0">The output stack holds nodes in <em>reverse</em> topological order. Pop from top to bottom to read the final valid sequence.</p>
+      <div style="display:flex;flex-direction:column;gap:.5rem;margin:1rem 0">
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <span style="font-family:var(--mono);font-size:.85rem;color:var(--muted);width:5rem">Stack Top:</span>
+          <div style="display:flex;gap:.4rem">
+            <span class="out-item" style="background:var(--indigo-600)">1</span>
+            <span class="out-item" style="background:var(--indigo-600)">3</span>
+            <span class="out-item" style="background:var(--indigo-600)">6</span>
+            <span class="out-item" style="background:var(--indigo-600)">2</span>
+            <span class="out-item" style="background:var(--indigo-600)">5</span>
+            <span class="out-item" style="background:var(--indigo-600)">4</span>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem">
+          <span style="font-family:var(--mono);font-size:.85rem;color:var(--muted);width:5rem">Pop order:</span>
+          <div style="display:flex;gap:.4rem;align-items:center">
+            <i class="fa-solid fa-arrow-right" style="color:var(--emerald-500)"></i>
+            <span style="font-family:var(--mono);font-size:.9rem;color:var(--emerald-400);font-weight:600">1 → 3 → 6 → 2 → 5 → 4</span>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="padding:1.25rem;border-color:rgba(16,185,129,.3)">
+        <h4 style="color:var(--emerald-400);margin-bottom:.5rem"><i class="fa-solid fa-check" style="margin-right:.35rem"></i>Verification</h4>
+        <p style="font-size:.85rem">Every edge 1→2, 1→3, 2→4, 2→5, 3→5, 3→6 points from a node on the left to a node on the right in this sequence. All dependency constraints are satisfied.</p>
+      </div>
+    </div>
+    <div class="card reveal d2" style="height:380px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:1.5rem">
+      <div style="font-size:3.5rem;font-family:var(--mono);font-weight:700;color:var(--indigo-500);letter-spacing:-.03em;line-height:1">1 3 6<br>2 5 4</div>
+      <p style="font-size:.85rem;text-align:center;max-width:220px">Reading the stack top-to-bottom gives the valid topological sequence for this DAG.</p>
+      <div style="display:flex;gap:.5rem">
+        <span style="font-size:.75rem;padding:.25rem .6rem;border-radius:.35rem;background:rgba(16,185,129,.1);color:var(--emerald-400);border:1px solid rgba(16,185,129,.2)">O(V+E) time</span>
+        <span style="font-size:.75rem;padding:.25rem .6rem;border-radius:.35rem;background:rgba(99,102,241,.1);color:var(--indigo-400);border:1px solid rgba(99,102,241,.2)">O(V) space</span>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 12: CYCLE DETECTION ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="reveal"><span class="badge rose">Edge Case Handling</span><h2>The <span class="tr">Back-Edge</span> Problem</h2></div>
+  <div class="g2" style="align-items:start;margin-top:.25rem">
+    <div class="reveal d1" style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="card" style="border-left:3px solid var(--rose-500);padding:1.25rem">
+        <h4 style="color:var(--rose-500);margin-bottom:.5rem"><i class="fa-solid fa-circle-exclamation" style="margin-right:.35rem"></i>Why Cycles Break Topological Sort</h4>
+        <p style="font-size:.85rem">If a cycle A→B→C→A exists, the algorithm requires A before B, B before C, and C before A — a logical impossibility. No valid linear ordering can exist.</p>
+      </div>
+      <div class="card" style="padding:1.25rem">
+        <h4 style="margin-bottom:.5rem"><i class="fa-solid fa-code" style="color:var(--sky-400);margin-right:.35rem"></i>Why a Simple Visited Set Fails</h4>
+        <p style="font-size:.85rem">A <code style="font-family:var(--mono);color:var(--sky-400)">visited</code> set only tracks whether a node has <em>ever</em> been processed. It cannot distinguish between "finished" and "currently active in the call stack."</p>
+      </div>
+      <div class="card" style="border-left:3px solid var(--emerald-500);padding:1.25rem">
+        <h4 style="color:var(--emerald-400);margin-bottom:.5rem"><i class="fa-solid fa-shield-halved" style="margin-right:.35rem"></i>The Recursion Stack Solution</h4>
+        <p style="font-size:.85rem">A secondary <code style="font-family:var(--mono);color:var(--emerald-400)">recStack</code> set tracks nodes currently active in the DFS call stack. A <strong>back edge</strong> is detected when we find a neighbor already in <code style="font-family:var(--mono);color:var(--emerald-400)">recStack</code>. This means we've looped back to an ancestor.</p>
+      </div>
+    </div>
+    <div class="reveal d2" style="display:flex;flex-direction:column;gap:.75rem">
+      <div class="card" style="padding:1.25rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+          <p style="font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Live Cycle Detection Animation</p>
+          <button id="btn-cycle-reset" style="font-size:.72rem;padding:.2rem .5rem;border-radius:.35rem;background:var(--border);border:1px solid var(--slate-700);color:var(--muted);cursor:pointer;font-family:var(--sans)">Reset</button>
+        </div>
+        <div class="cycle-canvas">
+          <svg id="cycle-svg" viewBox="0 0 580 160" style="width:100%;height:100%">
+            <defs>
+              <marker id="ca-def" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#475569"/></marker>
+              <marker id="ca-act" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#f59e0b"/></marker>
+              <marker id="ca-bk" viewBox="0 0 10 10" refX="28" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#f43f5e"/></marker>
+            </defs>
+            <!-- Forward edges -->
+            <line id="ce-ab" class="ce" x1="55" y1="80" x2="140" y2="80" marker-end="url(#ca-def)"/>
+            <line id="ce-bc" class="ce" x1="175" y1="80" x2="260" y2="80" marker-end="url(#ca-def)"/>
+            <line id="ce-cd" class="ce" x1="295" y1="80" x2="380" y2="80" marker-end="url(#ca-def)"/>
+            <line id="ce-de" class="ce" x1="415" y1="80" x2="500" y2="80" marker-end="url(#ca-def)"/>
+            <!-- Back edge: E → C (curved below) -->
+            <path id="ce-ec" class="ce" d="M 525 95 Q 420 145 295 95" fill="none" marker-end="url(#ca-def)"/>
+            <!-- Nodes -->
+            <g class="cn" id="cn-A"><circle cx="30" cy="80" r="22"/><text x="30" y="80" font-family="'Inter',sans-serif" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">A</text></g>
+            <g class="cn" id="cn-B"><circle cx="157" cy="80" r="22"/><text x="157" y="80" font-family="'Inter',sans-serif" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">B</text></g>
+            <g class="cn" id="cn-C"><circle cx="278" cy="80" r="22"/><text x="278" y="80" font-family="'Inter',sans-serif" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">C</text></g>
+            <g class="cn" id="cn-D"><circle cx="399" cy="80" r="22"/><text x="399" y="80" font-family="'Inter',sans-serif" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">D</text></g>
+            <g class="cn" id="cn-E"><circle cx="520" cy="80" r="22"/><text x="520" y="80" font-family="'Inter',sans-serif" fill="#94a3b8" font-size="13" font-weight="700" text-anchor="middle" dominant-baseline="central">E</text></g>
+            <!-- Back edge label -->
+            <text x="410" y="152" fill="#f43f5e" font-size="10" text-anchor="middle" font-family="'Fira Code',monospace">back edge: E → C</text>
+          </svg>
+        </div>
+        <div style="margin-top:.75rem">
+          <p style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:.4rem">Recursion Stack</p>
+          <div class="rec-display" id="rec-display"></div>
+        </div>
+        <div class="cycle-error" id="cycle-error"><i class="fa-solid fa-skull-crossbones"></i><span><strong>CycleDetectedError</strong> — E found C already in recursion stack. No topological order exists.</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 13: COMPLEXITY ══ -->
+<section class="slide">
+<div class="cw">
+  <div class="reveal"><span class="badge emerald">Performance Analysis</span><h2>Time &amp; Space <span class="ti">Complexity</span></h2></div>
+  <div class="g2" style="margin-top:.25rem;align-items:start">
+    <div class="reveal d1">
+      <div class="card" style="padding:1.25rem;margin-bottom:1rem">
+        <table class="comp-table">
+          <thead><tr><th>Component</th><th>Cost</th><th>Why?</th></tr></thead>
+          <tbody>
+            <tr><td>Outer for-loop</td><td><code>O(V)</code></td><td>Visits every vertex once</td></tr>
+            <tr><td>DFS traversal</td><td><code>O(E)</code></td><td>Each edge examined once via adjacency list</td></tr>
+            <tr><td>Visited check</td><td><code>O(1)</code></td><td>Hash set lookup — constant time</td></tr>
+            <tr><td>Stack push/pop</td><td><code>O(1)</code></td><td>Per operation, O(V) total</td></tr>
+            <tr><td><strong>Total Time</strong></td><td><code>O(V+E)</code></td><td>Linear — optimal for graph traversal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card" style="padding:1.25rem;border-color:rgba(14,165,233,.3)">
+        <table class="comp-table">
+          <thead><tr><th>Space Component</th><th>Cost</th></tr></thead>
+          <tbody>
+            <tr><td>Visited set</td><td><code>O(V)</code></td></tr>
+            <tr><td>Recursion stack (implicit)</td><td><code>O(V)</code></td></tr>
+            <tr><td>Output stack</td><td><code>O(V)</code></td></tr>
+            <tr><td><strong>Total Space</strong></td><td><code>O(V)</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="reveal d2" style="display:flex;flex-direction:column;gap:1rem">
+      <div class="card" style="border-left:3px solid var(--emerald-500)">
+        <h4 style="color:var(--emerald-400);margin-bottom:.5rem">Why O(V+E) is Optimal</h4>
+        <p style="font-size:.85rem">Any correct algorithm must inspect every edge at least once to verify dependency constraints. O(V+E) matches the size of the input itself — we can't do better without skipping information.</p>
+      </div>
+      <div class="card" style="border-left:3px solid var(--amber-500)">
+        <h4 style="color:var(--amber-400);margin-bottom:.5rem">Recursion Stack Risk</h4>
+        <p style="font-size:.85rem">For very deep chains (V vertices in a line), the implicit call stack reaches depth O(V). In languages with limited stack size, this can cause <strong>stack overflow</strong> for extremely large inputs. An iterative DFS variant avoids this.</p>
+      </div>
+      <div class="card" style="border-left:3px solid var(--sky-400)">
+        <h4 style="color:var(--sky-400);margin-bottom:.5rem">Real-World Scale</h4>
+        <p style="font-size:.85rem">npm's dependency graph has millions of nodes and edges. O(V+E) handles this in seconds on modern hardware — no exotic optimizations needed.</p>
+      </div>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 14: TAKEAWAYS ══ -->
+<section class="slide">
+<div class="cw" style="text-align:center">
+  <div class="reveal"><h2>Key <span class="ti">Takeaways</span></h2><p style="margin:.5rem auto 1.5rem;max-width:500px">A synthesis of Topological Sorting via DFS and the Decrease &amp; Conquer paradigm.</p></div>
+  <div class="g4">
+    <div class="card reveal d1" style="text-align:left;border-top:3px solid var(--sky-400)"><h4 style="color:var(--sky-400);margin-bottom:.4rem"><i class="fa-solid fa-compress" style="margin-right:.3rem"></i>Decrease &amp; Conquer</h4><p style="font-size:.83rem">We reduce the scheduling problem recursively to the smallest dependent nodes, solving backwards via post-order. Each call handles a strictly smaller subproblem.</p></div>
+    <div class="card reveal d2" style="text-align:left;border-top:3px solid var(--indigo-500)"><h4 style="color:var(--indigo-400);margin-bottom:.4rem"><i class="fa-solid fa-layer-group" style="margin-right:.3rem"></i>Post-Order Magic</h4><p style="font-size:.83rem">Standard DFS pushes on discovery. Topological sort pushes on <em>completion</em>. This one change ensures all descendants appear after their ancestor — automatically.</p></div>
+    <div class="card reveal d3" style="text-align:left;border-top:3px solid var(--emerald-500)"><h4 style="color:var(--emerald-400);margin-bottom:.4rem"><i class="fa-solid fa-bolt" style="margin-right:.3rem"></i>Linear Efficiency</h4><p style="font-size:.83rem">O(V+E) time, O(V) space. Handles massive real-world dependency graphs — npm, build systems, circuit simulators — all with the same elegant algorithm.</p></div>
+    <div class="card reveal d4" style="text-align:left;border-top:3px solid var(--rose-500)"><h4 style="color:var(--rose-500);margin-bottom:.4rem"><i class="fa-solid fa-ban" style="margin-right:.3rem"></i>Strict DAG Requirement</h4><p style="font-size:.83rem">A single back edge (cycle) invalidates the entire ordering. The recursion stack check is not optional — it's what separates correct implementations from broken ones.</p></div>
+  </div>
+</div>
+</section>
+
+<!-- ══ SLIDE 15: Q&A ══ -->
+<section class="slide">
+<div class="cw reveal" style="text-align:center">
+  <div style="display:inline-flex;align-items:center;justify-content:center;width:5rem;height:5rem;border-radius:1.25rem;background:var(--border);border:1px solid var(--slate-700);margin-bottom:2rem">
+    <i class="fa-solid fa-comments" style="font-size:2rem;color:var(--slate-500)"></i>
+  </div>
+  <h1 style="font-size:4rem">Questions?</h1>
+  <p style="margin-top:1rem;max-width:400px;margin-left:auto;margin-right:auto">Thank you. For the problem set, check the Activities page.</p>
+  <div style="display:flex;justify-content:center;gap:1rem;margin-top:2rem">
+    <a href="activities.html" style="display:flex;align-items:center;gap:.5rem;text-decoration:none;background:var(--indigo-600);color:white;padding:.65rem 1.5rem;border-radius:.5rem;font-size:.9rem;font-weight:600;transition:background .2s" onmouseover="this.style.background='#6366f1'" onmouseout="this.style.background='#4f46e5'"><i class="fa-solid fa-pen-to-square"></i> Go to Activities</a>
+  </div>
+</div>
+</section>
+
+</div><!-- #pres -->
+
+<script>
+/* ── REVEAL OBSERVER ── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('active');
+    else e.target.classList.remove('active');
+  });
+}, { root: document.getElementById('pres'), threshold: 0.2 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ── SLIDE COUNTER ── */
+const slides = document.querySelectorAll('.slide');
+const slideCounter = document.getElementById('slide-ctr');
+const pres = document.getElementById('pres');
+pres.addEventListener('scroll', () => {
+  const i = Math.round(pres.scrollTop / (window.innerHeight - 56));
+  slideCounter.textContent = `${i + 1} / ${slides.length}`;
+}, { passive: true });
+
+/* ── KEYBOARD NAV ── */
+window.addEventListener('keydown', e => {
+  const h = window.innerHeight - 56;
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') pres.scrollBy({ top: h, behavior: 'smooth' });
+  if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') pres.scrollBy({ top: -h, behavior: 'smooth' });
+});
+
+/* ══════════════════════════════════════════
+   DFS SIMULATION
+══════════════════════════════════════════ */
+const SIM_STEPS = [
+  { msg:"Simulation ready. Click Next Step to begin DFS traversal from Node 1.", n:{1:'',2:'',3:'',4:'',5:'',6:''}, e:{'1-2':'','1-3':'','2-4':'','2-5':'','3-5':'','3-6':''}, call:[], out:[] },
+  { msg:"Outer loop: Node 1 not yet visited → dfs(1) initiated. Mark 1 as visiting.", n:{1:'v'}, e:{}, call:['dfs(1)'], out:[] },
+  { msg:"dfs(1): iterate neighbors. First neighbor is 2. Traverse edge 1→2.", n:{1:'v'}, e:{'1-2':'a'}, call:['dfs(1)'], out:[] },
+  { msg:"Node 2 not yet visited → dfs(2) initiated. Mark 2 as visiting.", n:{1:'v',2:'v'}, e:{'1-2':'a'}, call:['dfs(1)','dfs(2)'], out:[] },
+  { msg:"dfs(2): first neighbor is 4. Traverse edge 2→4.", n:{1:'v',2:'v'}, e:{'1-2':'a','2-4':'a'}, call:['dfs(1)','dfs(2)'], out:[] },
+  { msg:"Node 4 not visited → dfs(4) initiated. Node 4 has NO outgoing neighbors.", n:{1:'v',2:'v',4:'v'}, e:{'1-2':'a','2-4':'a'}, call:['dfs(1)','dfs(2)','dfs(4)'], out:[] },
+  { msg:"★ POST-ORDER: dfs(4) complete → push(4) to output stack. Return to dfs(2).", n:{1:'v',2:'v',4:'d'}, e:{'1-2':'a','2-4':'d'}, call:['dfs(1)','dfs(2)'], out:[4] },
+  { msg:"dfs(2): next neighbor is 5. Traverse edge 2→5.", n:{1:'v',2:'v',4:'d'}, e:{'1-2':'a','2-5':'a'}, call:['dfs(1)','dfs(2)'], out:[4] },
+  { msg:"Node 5 not visited → dfs(5) initiated. Node 5 has NO outgoing neighbors.", n:{1:'v',2:'v',4:'d',5:'v'}, e:{'1-2':'a','2-5':'a'}, call:['dfs(1)','dfs(2)','dfs(5)'], out:[4] },
+  { msg:"★ POST-ORDER: dfs(5) complete → push(5) to output stack. Return to dfs(2).", n:{1:'v',2:'v',4:'d',5:'d'}, e:{'1-2':'a','2-5':'d'}, call:['dfs(1)','dfs(2)'], out:[4,5] },
+  { msg:"★ POST-ORDER: dfs(2) all neighbors processed → push(2) to output stack. Return to dfs(1).", n:{1:'v',2:'d',4:'d',5:'d'}, e:{'1-2':'d'}, call:['dfs(1)'], out:[4,5,2] },
+  { msg:"dfs(1): next neighbor is 3. Traverse edge 1→3.", n:{1:'v',2:'d',4:'d',5:'d'}, e:{'1-3':'a'}, call:['dfs(1)'], out:[4,5,2] },
+  { msg:"Node 3 not visited → dfs(3) initiated. Mark 3 as visiting.", n:{1:'v',2:'d',3:'v',4:'d',5:'d'}, e:{'1-3':'a'}, call:['dfs(1)','dfs(3)'], out:[4,5,2] },
+  { msg:"dfs(3): neighbor 5 is already visited — skip. Next: traverse edge 3→6.", n:{1:'v',2:'d',3:'v',4:'d',5:'d'}, e:{'1-3':'a','3-6':'a'}, call:['dfs(1)','dfs(3)'], out:[4,5,2] },
+  { msg:"Node 6 not visited → dfs(6) initiated. Node 6 has NO outgoing neighbors.", n:{1:'v',2:'d',3:'v',4:'d',5:'d',6:'v'}, e:{'1-3':'a','3-6':'a'}, call:['dfs(1)','dfs(3)','dfs(6)'], out:[4,5,2] },
+  { msg:"★ POST-ORDER: dfs(6) complete → push(6) to output stack. Return to dfs(3).", n:{1:'v',2:'d',3:'v',4:'d',5:'d',6:'d'}, e:{'1-3':'a','3-6':'d'}, call:['dfs(1)','dfs(3)'], out:[4,5,2,6] },
+  { msg:"★ POST-ORDER: dfs(3) all neighbors processed → push(3) to output stack. Return to dfs(1).", n:{1:'v',2:'d',3:'d',4:'d',5:'d',6:'d'}, e:{'1-3':'d'}, call:['dfs(1)'], out:[4,5,2,6,3] },
+  { msg:"★ POST-ORDER: dfs(1) all neighbors processed → push(1). Outer loop ends. DFS complete!", n:{1:'d',2:'d',3:'d',4:'d',5:'d',6:'d'}, e:{}, call:[], out:[4,5,2,6,3,1] },
+  { msg:"✓ Algorithm complete. Pop stack top→bottom for topological order: 1 → 3 → 6 → 2 → 5 → 4", n:{1:'d',2:'d',3:'d',4:'d',5:'d',6:'d'}, e:{}, call:[], out:[4,5,2,6,3,1], final:true },
+];
+
+const EDGE_MARKERS = { '':'url(#m-def)', 'a':'url(#m-act)', 'd':'url(#m-done)', 'skip':'url(#m-def)' };
+let simStep = 0, autoTimer = null;
+
+function renderSim(s) {
+  const step = SIM_STEPS[s];
+  // Nodes
+  [1,2,3,4,5,6].forEach(id => {
+    const g = document.getElementById(`sn-${id}`);
+    const state = step.n[id] !== undefined ? step.n[id] : (s > 0 ? getNodeState(id, s) : '');
+    g.setAttribute('data-s', state);
+  });
+  // Edges
+  ['1-2','1-3','2-4','2-5','3-5','3-6'].forEach(id => {
+    const el = document.getElementById(`se-${id}`);
+    const state = step.e[id] !== undefined ? step.e[id] : '';
+    el.setAttribute('data-s', state);
+    el.setAttribute('marker-end', EDGE_MARKERS[state] || EDGE_MARKERS['']);
+  });
+  // Call stack
+  const callEl = document.getElementById('sim-calls');
+  callEl.innerHTML = step.call.map((f, i) =>
+    `<div class="call-frame${i===step.call.length-1?' top':''}">${f}</div>`
+  ).join('');
+  // Output
+  const outEl = document.getElementById('sim-out');
+  outEl.innerHTML = step.out.map(n => `<div class="out-item">${n}</div>`).join('');
+  // Log
+  document.getElementById('sim-log').innerHTML = step.msg;
+  // Step counter
+  document.getElementById('step-ctr').textContent = `Step ${s} / ${SIM_STEPS.length - 1}`;
+  // Final result
+  const res = document.getElementById('sim-result');
+  if (step.final) res.style.display = 'block'; else res.style.display = 'none';
+  // Button states
+  document.getElementById('btn-next').disabled = s >= SIM_STEPS.length - 1;
+}
+
+function getNodeState(id, upToStep) {
+  for (let i = upToStep; i >= 0; i--) {
+    const s = SIM_STEPS[i];
+    if (s.n && s.n[id] !== undefined) return s.n[id];
+  }
+  return '';
+}
+
+document.getElementById('btn-next').addEventListener('click', () => {
+  if (simStep < SIM_STEPS.length - 1) { simStep++; renderSim(simStep); }
+});
+document.getElementById('btn-reset').addEventListener('click', () => {
+  clearAuto(); simStep = 0; renderSim(0);
+  document.getElementById('btn-auto').innerHTML = '<i class="fa-solid fa-play"></i> Auto';
+});
+
+let isAuto = false;
+function clearAuto() { if (autoTimer) { clearInterval(autoTimer); autoTimer = null; } isAuto = false; }
+document.getElementById('btn-auto').addEventListener('click', () => {
+  if (isAuto) { clearAuto(); document.getElementById('btn-auto').innerHTML = '<i class="fa-solid fa-play"></i> Auto'; return; }
+  isAuto = true;
+  document.getElementById('btn-auto').innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+  const speed = parseInt(document.getElementById('speed-slider').value);
+  autoTimer = setInterval(() => {
+    if (simStep >= SIM_STEPS.length - 1) { clearAuto(); document.getElementById('btn-auto').innerHTML = '<i class="fa-solid fa-play"></i> Auto'; return; }
+    simStep++; renderSim(simStep);
+  }, speed);
+});
+
+document.getElementById('speed-slider').addEventListener('input', function() {
+  const spd = parseInt(this.value);
+  const mult = (2100 - spd) / 900;
+  document.getElementById('speed-label').textContent = mult.toFixed(1) + '×';
+  if (isAuto) {
+    clearAuto(); isAuto = true;
+    document.getElementById('btn-auto').innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+    autoTimer = setInterval(() => {
+      if (simStep >= SIM_STEPS.length - 1) { clearAuto(); document.getElementById('btn-auto').innerHTML = '<i class="fa-solid fa-play"></i> Auto'; return; }
+      simStep++; renderSim(simStep);
+    }, spd);
+  }
+});
+
+renderSim(0);
+
+/* ══════════════════════════════════════════
+   CYCLE DETECTION ANIMATION
+══════════════════════════════════════════ */
+const CYCLE_STEPS = [
+  { nodes:[], edges:[], rec:[], msg:'', error:false },
+  { nodes:['A'], edges:['ab'], rec:['A'], msg:'dfs(A): visit A, add to recStack.', error:false },
+  { nodes:['A','B'], edges:['ab','bc'], rec:['A','B'], msg:'dfs(B): visit B, add to recStack.', error:false },
+  { nodes:['A','B','C'], edges:['ab','bc','cd'], rec:['A','B','C'], msg:'dfs(C): visit C, add to recStack.', error:false },
+  { nodes:['A','B','C','D'], edges:['ab','bc','cd','de'], rec:['A','B','C','D'], msg:'dfs(D): visit D, add to recStack.', error:false },
+  { nodes:['A','B','C','D','E'], edges:['ab','bc','cd','de'], rec:['A','B','C','D','E'], msg:'dfs(E): visit E, add to recStack. Check neighbors...', error:false },
+  { nodes:['A','B','C','D','E'], edges:['ab','bc','cd','de'], rec:['A','B','C','D','E'], backEdge:true, cycleNode:'C', msg:'E\'s neighbor is C — C is IN recStack! Back edge detected.', error:true },
+];
+
+let cycleStep = 0, cycleTimer = null;
+
+function renderCycle(s) {
+  const step = CYCLE_STEPS[s];
+  ['A','B','C','D','E'].forEach(n => {
+    const el = document.getElementById(`cn-${n}`);
+    el.classList.remove('visiting','cycle');
+    if (step.nodes.includes(n)) {
+      if (step.cycleNode === n) el.classList.add('cycle');
+      else el.classList.add('visiting');
+    }
+  });
+  ['ab','bc','cd','de'].forEach(id => {
+    const el = document.getElementById(`ce-${id}`);
+    el.classList.remove('active','done');
+    if (step.edges.includes(id)) el.classList.add('active');
+  });
+  const ec = document.getElementById('ce-ec');
+  ec.classList.remove('back');
+  if (step.backEdge) { ec.classList.add('back'); ec.setAttribute('marker-end','url(#ca-bk)'); }
+  else { ec.setAttribute('marker-end','url(#ca-def)'); }
+  
+  const recEl = document.getElementById('rec-display');
+  recEl.innerHTML = step.rec.map((n,i) =>
+    `<div class="rec-item${(step.cycleNode===n||step.cycleNode) && n===step.cycleNode?' cycle-item':''}">${n}</div>`
+  ).join('');
+
+  const err = document.getElementById('cycle-error');
+  if (step.error) err.classList.add('show'); else err.classList.remove('show');
+}
+
+function startCycleAnim() {
+  cycleTimer = setInterval(() => {
+    cycleStep = (cycleStep + 1) % CYCLE_STEPS.length;
+    renderCycle(cycleStep);
+    if (cycleStep === CYCLE_STEPS.length - 1) { setTimeout(() => { cycleStep = 0; renderCycle(0); }, 2200); }
+  }, 1100);
+}
+
+document.getElementById('btn-cycle-reset').addEventListener('click', () => {
+  clearInterval(cycleTimer); cycleStep = 0; renderCycle(0); setTimeout(startCycleAnim, 800);
+});
+
+renderCycle(0);
+setTimeout(startCycleAnim, 1200);
+</script>
+</body>
+</html>

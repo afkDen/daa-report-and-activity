@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Problem Set — Topological Sorting | DAA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root {
+  --slate-50:#f8fafc;--slate-300:#cbd5e1;--slate-400:#94a3b8;--slate-500:#64748b;
+  --slate-600:#475569;--slate-700:#334155;--slate-800:#1e293b;--slate-900:#0f172a;--slate-950:#020617;
+  --indigo-400:#818cf8;--indigo-500:#6366f1;--indigo-600:#4f46e5;
+  --sky-400:#38bdf8;--sky-500:#0ea5e9;--rose-500:#f43f5e;--rose-400:#fb7185;
+  --emerald-400:#34d399;--emerald-500:#10b981;--amber-400:#fbbf24;--amber-500:#f59e0b;
+  --bg:#020617;--card:#0f172a;--card2:#111827;--border:#1e293b;--border2:#243047;
+  --text:#f8fafc;--muted:#94a3b8;
+  --sans:'Inter',system-ui,sans-serif;--mono:'Fira Code',monospace;
+  --nav-h:56px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);-webkit-font-smoothing:antialiased;line-height:1.6;min-height:100vh}
+
+/* NAV */
+.site-nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);z-index:200;background:rgba(2,6,23,0.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:100%;padding:0 2rem}
+.nav-brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--text);font-weight:600;font-size:.95rem}
+.nav-brand i{color:var(--indigo-500)}
+.nav-links{display:flex;align-items:center;gap:.5rem}
+.nav-link{display:flex;align-items:center;gap:.4rem;text-decoration:none;color:var(--muted);font-size:.85rem;font-weight:500;padding:.4rem .8rem;border-radius:.5rem;transition:all .2s}
+.nav-link:hover,.nav-link.active{color:var(--text);background:var(--border)}
+.nav-link.active{color:var(--indigo-400)}
+.nav-badge{font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:9999px;background:rgba(99,102,241,.12);color:var(--indigo-400);border:1px solid rgba(99,102,241,.25);margin-left:.5rem}
+
+/* BG PATTERN */
+.bg-pattern{position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(to right,var(--slate-900) 1px,transparent 1px),linear-gradient(to bottom,var(--slate-900) 1px,transparent 1px);
+  background-size:4rem 4rem;-webkit-mask-image:radial-gradient(ellipse at center,black 0%,transparent 75%);mask-image:radial-gradient(ellipse at center,black 0%,transparent 75%);
+  opacity:.3;pointer-events:none}
+
+/* LAYOUT */
+.page-wrap{position:relative;z-index:1;padding-top:calc(var(--nav-h) + 3rem);padding-bottom:5rem;padding-left:1rem;padding-right:1rem}
+.max-w{max-width:52rem;margin:0 auto}
+
+/* HEADER */
+.page-header{margin-bottom:3rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.badge{display:inline-flex;align-items:center;border-radius:9999px;background:rgba(99,102,241,.1);padding:.25rem .75rem;font-size:.78rem;font-weight:600;color:var(--indigo-400);border:1px solid rgba(99,102,241,.2);margin-bottom:1rem;letter-spacing:.03em;text-transform:uppercase}
+.page-title{font-size:2.2rem;font-weight:700;letter-spacing:-.035em;color:var(--text);margin-bottom:.5rem}
+.page-desc{font-size:.95rem;color:var(--muted);max-width:42rem;line-height:1.7}
+.header-meta{display:flex;gap:1rem;margin-top:1.25rem;flex-wrap:wrap}
+.meta-chip{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--muted);background:var(--border);padding:.3rem .7rem;border-radius:.5rem;border:1px solid var(--border2)}
+.meta-chip i{font-size:.7rem}
+
+/* PROBLEM CARDS */
+.problem-grid{display:flex;flex-direction:column;gap:1.75rem}
+
+.prob-card{background:var(--card);border:1px solid var(--border);border-radius:1rem;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.prob-card:hover{border-color:var(--border2);box-shadow:0 8px 30px rgba(0,0,0,.4)}
+
+.prob-header{background:var(--card);border-bottom:1px solid var(--border);padding:1.1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.prob-title-wrap{display:flex;align-items:center;gap:.75rem}
+.prob-num{display:flex;align-items:center;justify-content:center;width:2rem;height:2rem;background:var(--indigo-600);color:#fff;font-weight:700;border-radius:.5rem;font-size:.875rem;font-family:var(--mono)}
+.prob-name{font-size:1.05rem;font-weight:600;color:var(--text)}
+.topic-tag{font-family:var(--mono);font-size:.67rem;background:var(--border);color:var(--muted);padding:.25rem .6rem;border-radius:.3rem;font-weight:500;letter-spacing:.04em;white-space:nowrap}
+
+.prob-body{padding:1.5rem}
+.prob-text{font-size:.92rem;color:var(--muted);margin-bottom:1.25rem;line-height:1.7}
+
+/* GRAPH CONTAINER */
+.graph-box{background:var(--slate-950);border:1px solid var(--border2);border-radius:.75rem;padding:1.5rem;margin-bottom:1.25rem;display:flex;justify-content:center;align-items:center;
+  background-image:radial-gradient(rgba(30,41,59,.7) 1px,transparent 1px);background-size:20px 20px;
+  min-height:140px;overflow:visible;position:relative}
+.graph-label{position:absolute;top:.5rem;left:.75rem;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-600);font-family:var(--mono)}
+
+/* SVG Styles (dark theme) */
+.n-base circle{fill:var(--slate-800);stroke:var(--slate-600);stroke-width:2;transition:all .3s}
+.n-base text{fill:var(--muted);font-family:var(--sans);font-size:13px;font-weight:700;text-anchor:middle;dominant-baseline:central}
+.n-primary circle{fill:rgba(99,102,241,.2);stroke:var(--indigo-500);stroke-width:2}
+.n-primary text{fill:var(--indigo-400)}
+.n-danger circle{fill:rgba(244,63,94,.12);stroke:var(--rose-500);stroke-width:2;stroke-dasharray:none}
+.n-danger text{fill:var(--rose-400)}
+.n-dashed circle{fill:var(--slate-900);stroke:var(--slate-600);stroke-width:1.5;stroke-dasharray:4 2}
+.n-dashed text{fill:var(--slate-600)}
+.n-secondary circle{fill:var(--slate-800);stroke:var(--sky-400);stroke-width:2}
+.n-secondary text{fill:var(--sky-400)}
+
+.e-base{stroke:var(--slate-600);stroke-width:1.8;fill:none}
+.e-danger{stroke:var(--rose-500);stroke-width:2;stroke-dasharray:5 3;fill:none}
+
+/* TASK BOX */
+.task-box{background:rgba(99,102,241,.05);border-left:3px solid var(--indigo-500);border-radius:0 .6rem .6rem 0;border:1px solid rgba(99,102,241,.2);border-left:3px solid var(--indigo-500);padding:1rem 1.25rem;font-size:.9rem;color:var(--muted);line-height:1.7}
+.task-box strong{color:var(--text)}
+
+/* FORMAT HINT */
+.format-hint{margin-top:1rem;padding-top:1rem;border-top:1px dashed rgba(99,102,241,.25);font-family:var(--mono);font-size:.82rem;color:var(--indigo-400)}
+.format-hint strong{font-family:var(--sans);color:var(--muted);font-weight:600;display:block;margin-bottom:.4rem}
+.ph{color:var(--slate-600);letter-spacing:.06em}
+
+code{font-family:var(--mono);background:rgba(99,102,241,.1);color:var(--indigo-400);padding:.1rem .4rem;border-radius:.25rem;font-size:.85em;border:1px solid rgba(99,102,241,.15)}
+
+/* GRAPH SPLIT */
+.graph-split{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+.graph-half{background:var(--slate-950);border:1px solid var(--border2);border-radius:.75rem;padding:1.25rem;display:flex;flex-direction:column;align-items:center;
+  background-image:radial-gradient(rgba(30,41,59,.7) 1px,transparent 1px);background-size:20px 20px}
+.graph-half-label{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-600);font-family:var(--mono);margin-bottom:.6rem;align-self:flex-start}
+
+/* ANIMATIONS */
+@keyframes fade-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.prob-card{animation:fade-in .5s ease-out both}
+.prob-card:nth-child(1){animation-delay:.05s}
+.prob-card:nth-child(2){animation-delay:.12s}
+.prob-card:nth-child(3){animation-delay:.19s}
+.prob-card:nth-child(4){animation-delay:.26s}
+
+/* Legend */
+.legend{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:.75rem}
+.legend-item{display:flex;align-items:center;gap:.35rem;font-size:.72rem;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+</style>
+</head>
+<body>
+<div class="bg-pattern"></div>
+
+<!-- NAV -->
+<nav class="site-nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-brand"><i class="fa-solid fa-diagram-project"></i> Topological Sort</a>
+    <div class="nav-links">
+      <a href="index.html" class="nav-link"><i class="fa-solid fa-book-open"></i> Report</a>
+      <a href="activities.html" class="nav-link active"><i class="fa-solid fa-pen-to-square"></i> Activities</a>
+      <span class="nav-badge">DAA</span>
+    </div>
+  </div>
+</nav>
+
+<div class="page-wrap">
+<div class="max-w">
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <span class="badge"><i class="fa-solid fa-flask" style="margin-right:.35rem"></i>Problem Set</span>
+    <h1 class="page-title">Topological Sorting</h1>
+    <p class="page-desc">Solve the following problems, showing your step-by-step algorithmic trace where applicable. Assume neighbor iteration processes in numerical/alphabetical order unless stated otherwise.</p>
+    <div class="header-meta">
+      <span class="meta-chip"><i class="fa-solid fa-layer-group" style="color:var(--indigo-400)"></i>4 Problems</span>
+      <span class="meta-chip"><i class="fa-solid fa-clock" style="color:var(--sky-400)"></i>Algorithm: DFS Post-Order</span>
+      <span class="meta-chip"><i class="fa-solid fa-lock" style="color:var(--amber-400)"></i><a href="answers.html" style="color:inherit;text-decoration:none">Answers: Password Protected</a></span>
+    </div>
+  </header>
+
+  <!-- SVG DEFS (shared) -->
+  <svg style="width:0;height:0;position:absolute" aria-hidden="true">
+    <defs>
+      <marker id="arr" viewBox="0 0 10 10" refX="30" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L10 5 L0 10z" fill="#475569"/>
+      </marker>
+      <marker id="arr-danger" viewBox="0 0 10 10" refX="30" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L10 5 L0 10z" fill="#f43f5e"/>
+      </marker>
+      <marker id="arr-sky" viewBox="0 0 10 10" refX="30" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L10 5 L0 10z" fill="#38bdf8"/>
+      </marker>
+    </defs>
+  </svg>
+
+  <div class="problem-grid">
+
+    <!-- ══ PROBLEM 01 ══ -->
+    <div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-title-wrap">
+          <span class="prob-num">01</span>
+          <h2 class="prob-name">The Deep Forest Trace</h2>
+        </div>
+        <span class="topic-tag">POST-ORDER &amp; VISITED TRACKING</span>
+      </div>
+      <div class="prob-body">
+        <p class="prob-text">A software project's build dependencies are mapped below. Notice the cross-dependencies in the main block and the <strong style="color:var(--text)">independent module (Nodes 7, 8, 9)</strong>. The algorithm uses an outer <code>for each node</code> loop that checks nodes from 1 → 9 in order.</p>
+
+        <div class="graph-box" style="min-height:200px">
+          <span class="graph-label">Dependency Graph — 9 Nodes, 2 Components</span>
+          <svg viewBox="0 0 660 190" style="max-width:100%;width:100%;overflow:visible">
+            <!-- Legend dots -->
+            <!-- Component 1 edges -->
+            <line x1="60" y1="95" x2="155" y2="40" class="e-base" marker-end="url(#arr)"/>
+            <line x1="60" y1="95" x2="155" y2="152" class="e-base" marker-end="url(#arr)"/>
+            <line x1="182" y1="40" x2="263" y2="40" class="e-base" marker-end="url(#arr)"/>
+            <line x1="182" y1="152" x2="263" y2="40" class="e-base" marker-end="url(#arr)"/>
+            <line x1="182" y1="152" x2="263" y2="152" class="e-base" marker-end="url(#arr)"/>
+            <line x1="290" y1="40" x2="365" y2="95" class="e-base" marker-end="url(#arr)"/>
+            <line x1="290" y1="152" x2="365" y2="95" class="e-base" marker-end="url(#arr)"/>
+            <!-- Component 2 edges (dashed style) -->
+            <line x1="472" y1="95" x2="560" y2="42" class="e-base" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+            <line x1="472" y1="95" x2="560" y2="150" class="e-base" stroke-dasharray="4 3" marker-end="url(#arr)"/>
+
+            <!-- Component 1 Nodes -->
+            <g class="n-primary">
+              <circle cx="60" cy="95" r="25"/><text x="60" y="95">1</text>
+            </g>
+            <g class="n-base"><circle cx="168" cy="40" r="25"/><text x="168" y="40">2</text></g>
+            <g class="n-base"><circle cx="168" cy="152" r="25"/><text x="168" y="152">4</text></g>
+            <g class="n-base"><circle cx="276" cy="40" r="25"/><text x="276" y="40">3</text></g>
+            <g class="n-base"><circle cx="276" cy="152" r="25"/><text x="276" y="152">5</text></g>
+            <g class="n-base"><circle cx="378" cy="95" r="25"/><text x="378" y="95">6</text></g>
+
+            <!-- Separator line -->
+            <line x1="428" y1="20" x2="428" y2="170" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <text x="428" y="8" fill="#334155" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">DISCONNECTED</text>
+
+            <!-- Component 2 Nodes (dashed) -->
+            <g class="n-dashed"><circle cx="455" cy="95" r="25"/><text x="455" y="95">7</text></g>
+            <g class="n-dashed"><circle cx="572" cy="40" r="25"/><text x="572" y="40">8</text></g>
+            <g class="n-dashed"><circle cx="572" cy="152" r="25"/><text x="572" y="152">9</text></g>
+
+            <!-- Component labels -->
+            <text x="220" y="185" fill="#334155" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace">Component 1: Nodes 1–6</text>
+            <text x="513" y="185" fill="#334155" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace">Component 2: Nodes 7–9</text>
+          </svg>
+        </div>
+
+        <div class="task-box">
+          <strong>Task A:</strong> List the exact sequence of nodes that trigger a completely new <code>dfs()</code> call from the main algorithm's outer <code>for</code> loop. (Exclude nodes visited recursively from within another <code>dfs()</code> call.)
+          <br><br>
+          <strong>Task B:</strong> Execute a full manual trace. Provide the exact order all 9 nodes are <em>pushed to the output stack</em>, then write the final Topological Sequence (reading the stack from top to bottom).
+          <div class="format-hint">
+            <strong>Expected Answer Format:</strong>
+            Task A Outer Loop Triggers: <span class="ph">[ _, _ ]</span><br>
+            Task B Push Order: <span class="ph">[ _, _, _, _, _, _, _, _, _ ]</span><br>
+            Task B Final Sequence: <span class="ph">[ _, _, _, _, _, _, _, _, _ ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROBLEM 02 ══ -->
+    <div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-title-wrap">
+          <span class="prob-num">02</span>
+          <h2 class="prob-name">The Deep Deadlock</h2>
+        </div>
+        <span class="topic-tag">RECURSION STACK TRACKING</span>
+      </div>
+      <div class="prob-body">
+        <p class="prob-text">A continuous integration pipeline attempts to compile five microservices. The automated topological sort (starting at node <strong style="color:var(--text)">A</strong>) crashes with a <strong style="color:var(--rose-400)">"Cyclic Dependency Detected"</strong> error. The back edge is shown in red.</p>
+
+        <div class="graph-box" style="min-height:155px">
+          <span class="graph-label">CI Pipeline Graph — Cycle: E → C</span>
+          <svg viewBox="0 0 600 130" style="max-width:100%;width:100%;overflow:visible">
+            <!-- Forward edges -->
+            <line x1="58" y1="65" x2="148" y2="65" class="e-base" marker-end="url(#arr)"/>
+            <line x1="178" y1="65" x2="268" y2="65" class="e-base" marker-end="url(#arr)"/>
+            <line x1="298" y1="65" x2="388" y2="65" class="e-base" marker-end="url(#arr)"/>
+            <line x1="418" y1="65" x2="508" y2="65" class="e-base" marker-end="url(#arr)"/>
+            <!-- Back edge: E → C (curves below) -->
+            <path d="M 533 78 Q 415 122 298 78" class="e-danger" marker-end="url(#arr-danger)"/>
+
+            <!-- Nodes -->
+            <g class="n-primary"><circle cx="35" cy="65" r="22"/><text x="35" y="65">A</text></g>
+            <g class="n-base"><circle cx="163" cy="65" r="22"/><text x="163" y="65">B</text></g>
+            <g class="n-base"><circle cx="283" cy="65" r="22"/><text x="283" y="65">C</text></g>
+            <g class="n-base"><circle cx="403" cy="65" r="22"/><text x="403" y="65">D</text></g>
+            <g class="n-danger"><circle cx="523" cy="65" r="22"/><text x="523" y="65">E</text></g>
+
+            <!-- Labels -->
+            <text x="415" y="120" fill="#f43f5e" font-size="9.5" text-anchor="middle" font-family="'Fira Code',monospace" opacity=".8">back edge — creates cycle</text>
+          </svg>
+        </div>
+
+        <div class="task-box">
+          <strong>Task:</strong> Standard <code>Visited</code> arrays alone are insufficient — this requires an <code>Active Recursion Stack</code>. At the exact microsecond the algorithm evaluates the back edge <strong style="color:var(--rose-400)">(E → C)</strong> and throws the cycle error, list the exact contents of:
+          <br><br>
+          1. The permanent <code>Visited</code> Set (all nodes seen so far).<br>
+          2. The temporary <code>Active Recursion Stack</code> array (currently active frames only).
+          <div class="format-hint">
+            <strong>Expected Answer Format:</strong>
+            1. Visited Set: <span class="ph">{ _, _, _, _, _ }</span><br>
+            2. Recursion Stack: <span class="ph">[ _, _, _, _, _ ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROBLEM 03 ══ -->
+    <div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-title-wrap">
+          <span class="prob-num">03</span>
+          <h2 class="prob-name">Alternative Configurations</h2>
+        </div>
+        <span class="topic-tag">ADJACENCY LIST MECHANICS</span>
+      </div>
+      <div class="prob-body">
+        <p class="prob-text">You are managing an assembly line mapped by the graph below. Notice that <strong style="color:var(--text)">two independent sources (T1 and T2)</strong> both converge into a shared intermediate stage (T3 and T4), which both converge to <strong style="color:var(--text)">End</strong>.</p>
+
+        <div class="graph-box" style="min-height:180px">
+          <span class="graph-label">Assembly Line Graph — Diamond Configuration</span>
+          <svg viewBox="0 0 420 165" style="max-width:100%;width:100%;overflow:visible">
+            <!-- Edges -->
+            <line x1="82" y1="50" x2="205" y2="50" class="e-base" marker-end="url(#arr)"/>
+            <line x1="82" y1="115" x2="205" y2="115" class="e-base" marker-end="url(#arr)"/>
+            <line x1="255" y1="50" x2="345" y2="82" class="e-base" marker-end="url(#arr)"/>
+            <line x1="255" y1="115" x2="345" y2="97" class="e-base" marker-end="url(#arr)"/>
+
+            <!-- Nodes -->
+            <g class="n-secondary"><circle cx="58" cy="50" r="25"/><text x="58" y="50">T1</text></g>
+            <g class="n-secondary"><circle cx="58" cy="115" r="25"/><text x="58" y="115">T2</text></g>
+            <g class="n-base"><circle cx="230" cy="50" r="25"/><text x="230" y="50">T3</text></g>
+            <g class="n-base"><circle cx="230" cy="115" r="25"/><text x="230" y="115">T4</text></g>
+            <g class="n-base"><circle cx="370" cy="89" r="26"/><text x="370" y="89" font-size="11" font-weight="700">End</text></g>
+
+            <!-- Arrows indicating flow direction annotations -->
+            <text x="140" y="38" fill="#334155" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">T1→T3</text>
+            <text x="140" y="130" fill="#334155" font-size="9" text-anchor="middle" font-family="'Fira Code',monospace">T2→T4</text>
+          </svg>
+        </div>
+
+        <div class="task-box">
+          <strong>Task A:</strong> Provide <strong>three</strong> mathematically valid topological sequences for this graph.<br><br>
+          <strong>Task B:</strong> Assume the adjacency list is modified to process neighbors in strict <strong>reverse-numerical order</strong> (T1 visits T4 before T3; T2 visits T4 before T3). Write the exact single sequence the DFS algorithm produces under this condition.
+          <div class="format-hint">
+            <strong>Expected Answer Format:</strong>
+            Task A — Sequence 1: <span class="ph">[ _, _, _, _, End ]</span><br>
+            Task A — Sequence 2: <span class="ph">[ _, _, _, _, End ]</span><br>
+            Task A — Sequence 3: <span class="ph">[ _, _, _, _, End ]</span><br><br>
+            Task B — Exact Output: <span class="ph">[ _, _, _, _, End ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PROBLEM 04 ══ -->
+    <div class="prob-card">
+      <div class="prob-header">
+        <div class="prob-title-wrap">
+          <span class="prob-num">04</span>
+          <h2 class="prob-name">Complexity &amp; Recursion Bounds</h2>
+        </div>
+        <span class="topic-tag">SPACE COMPLEXITY O(V)</span>
+      </div>
+      <div class="prob-body">
+        <p class="prob-text">The algorithm's Space Complexity is bounded by <code>O(V)</code> — memory consumed by the <code>Visited</code> array, the output <code>Stack</code>, and the call stack's recursion frames. Two topologically distinct graph structures are given below.</p>
+
+        <div class="graph-split">
+          <div class="graph-half">
+            <div class="graph-half-label">Graph A — Deep Chain</div>
+            <svg viewBox="0 0 280 50" style="width:100%;max-width:280px;overflow:visible">
+              <line x1="42" y1="25" x2="102" y2="25" class="e-base" marker-end="url(#arr)"/>
+              <line x1="122" y1="25" x2="182" y2="25" class="e-base" marker-end="url(#arr)"/>
+              <line x1="202" y1="25" x2="262" y2="25" class="e-base" marker-end="url(#arr)"/>
+              <g class="n-base"><circle cx="22" cy="25" r="18"/><text x="22" y="25" font-size="12">A</text></g>
+              <g class="n-base"><circle cx="112" cy="25" r="18"/><text x="112" y="25" font-size="12">B</text></g>
+              <g class="n-base"><circle cx="192" cy="25" r="18"/><text x="192" y="25" font-size="12">C</text></g>
+              <g class="n-base"><circle cx="272" cy="25" r="18"/><text x="272" y="25" font-size="12">D</text></g>
+            </svg>
+            <p style="font-size:.7rem;color:var(--slate-600);font-family:var(--mono);margin-top:.6rem">A → B → C → D (linear)</p>
+          </div>
+          <div class="graph-half">
+            <div class="graph-half-label">Graph B — Wide Fan</div>
+            <svg viewBox="0 0 220 120" style="width:100%;max-width:220px;overflow:visible">
+              <line x1="110" y1="28" x2="48" y2="90" class="e-base" marker-end="url(#arr)"/>
+              <line x1="110" y1="28" x2="110" y2="84" class="e-base" marker-end="url(#arr)"/>
+              <line x1="110" y1="28" x2="172" y2="90" class="e-base" marker-end="url(#arr)"/>
+              <g class="n-primary"><circle cx="110" cy="22" r="20"/><text x="110" y="22" font-size="12">A</text></g>
+              <g class="n-base"><circle cx="38" cy="100" r="20"/><text x="38" y="100" font-size="12">B</text></g>
+              <g class="n-base"><circle cx="110" cy="100" r="20"/><text x="110" y="100" font-size="12">C</text></g>
+              <g class="n-base"><circle cx="182" cy="100" r="20"/><text x="182" y="100" font-size="12">D</text></g>
+            </svg>
+            <p style="font-size:.7rem;color:var(--slate-600);font-family:var(--mono);margin-top:.6rem">A → {B, C, D} (one-to-many)</p>
+          </div>
+        </div>
+
+        <div class="task-box">
+          <strong>Task A:</strong> State the exact maximum depth (number of concurrent active call frames) of the Recursion Stack when processing <strong>Graph A</strong>.<br><br>
+          <strong>Task B:</strong> State the exact maximum depth when processing <strong>Graph B</strong>.<br><br>
+          <strong>Task C:</strong> A massive network graph has exactly <strong>2,500 vertices</strong> structured as a single deep chain (like Graph A, but 2,500 nodes). What is the exact number of elements stored in the <code>Active Recursion Stack</code> at the deepest point of execution?
+          <div class="format-hint">
+            <strong>Expected Answer Format:</strong>
+            Task A — Max Depth: <span class="ph">[ Number ]</span><br>
+            Task B — Max Depth: <span class="ph">[ Number ]</span><br>
+            Task C — Max Elements at Deepest Point: <span class="ph">[ Number ]</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /problem-grid -->
+</div><!-- /max-w -->
+</div><!-- /page-wrap -->
+
+</body>
+</html>
